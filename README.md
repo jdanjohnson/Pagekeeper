@@ -48,6 +48,59 @@ You (Browser/App)                       Your Server / Mac
 
 **No database.** GitHub is the backend — repos store your agent files, commits are your version history, and the GitHub API handles everything.
 
+## Connecting Your Agent to GitHub
+
+Before using Pagekeeper, your agent's knowledge files need to live in a GitHub repo. Here's how to get started depending on your situation:
+
+### Option A: Starting Fresh (No existing files)
+
+1. Open Pagekeeper and click **"New Agent"**
+2. Pick a name, choose a template (e.g. Default Agent, Support Bot, etc.)
+3. Pagekeeper creates a private GitHub repo with pre-filled SOUL.md, MEMORY.md, USER.md, and AGENTS.md
+4. Done — start editing right away
+
+### Option B: You Already Have Agent Files on a VPS or Mac
+
+If your agent (OpenClaw, etc.) already has knowledge files on disk, export them to GitHub:
+
+```bash
+# 1. Go to where your agent files live
+cd /path/to/your/agent/files
+# e.g. cd ~/.openclaw/workspace  or  cd ~/my-agent
+
+# 2. Initialize a git repo
+git init
+git add -A
+git commit -m "Initial export of agent knowledge files"
+
+# 3. Create a new repo on GitHub
+#    Go to https://github.com/new → name it, set to Private, click Create
+#    Then push your files:
+git remote add origin git@github.com:YOU/YOUR-AGENT.git
+git branch -M main
+git push -u origin main
+```
+
+Now open Pagekeeper → click **"Open Existing Repo"** → select your repo. Pagekeeper will find all your markdown files automatically.
+
+### Option C: You Have Files on GitHub Already
+
+Click **"Open Existing Repo"** in Pagekeeper. It scans the repo, finds every markdown file (even in subdirectories), and you can start editing immediately.
+
+### After Connecting: Keep Your Agent in Sync
+
+Once your files are on GitHub, set up auto-sync so your agent always reads the latest version:
+
+```bash
+# On your VPS / server — pull changes every minute
+git clone git@github.com:YOU/YOUR-AGENT.git ~/agent-workspace
+(crontab -l 2>/dev/null; echo "* * * * * cd ~/agent-workspace && git pull --quiet") | crontab -
+```
+
+Now the flow is: **Edit in Pagekeeper → saved to GitHub → auto-pulled to your server → agent reads latest files.**
+
+---
+
 ## Three Ways to Use Pagekeeper
 
 | Version | Best For | Setup |
