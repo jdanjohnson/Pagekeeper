@@ -1,30 +1,46 @@
-# ClawSync (Pagekeeper)
+# Pagekeeper
 
-A beginner-friendly file sync system for AI agent knowledge management. Think of it as GitHub with a better UI — designed for non-developers managing AI agent files like SOUL.md, MEMORY.md, and more.
+**Your files. Always in sync. From anywhere.**
 
-ClawSync keeps your OpenClaw (and any file-reading AI agent) running on the latest version of your knowledge files. Edit in the browser, and your agents pick up changes automatically.
+GitHub is way better than just your local computer — it truly enables you to connect from **anywhere** and using **any tool**. But it can be intimidating for first-timers or non-developers.
+
+That's where Pagekeeper comes in. It helps you make changes how you know best — through a simple, visual interface — and in the background, it keeps everything synced and up to date. No terminal. No git commands. Just edit and go.
+
+Built for [OpenClaw](https://github.com/openclaw) and any AI agent that reads knowledge files from disk (SOUL.md, MEMORY.md, USER.md, AGENTS.md, etc.).
 
 ## Screenshots
 
 ### Web App — Landing Page
 ![Landing Page](screenshots/landing-page.png)
 
-### HTML Local Edition — Login
+### HTML Local Edition — PAT Login
 ![HTML Local Login](screenshots/html-login.png)
+
+## Why GitHub as the Backend?
+
+Most people think of GitHub as "developer stuff." But for AI agent files, it's actually the perfect backend:
+
+- **Access from anywhere** — edit from your phone, laptop, tablet, VPS
+- **Connect any tool** — VS Code, Obsidian, the GitHub app, or Pagekeeper's visual editor
+- **Full version history** — every change is tracked, nothing is ever lost
+- **Free and reliable** — no database to manage, no servers to maintain
+- **Works offline** — files sync when you're back online
+
+Pagekeeper makes GitHub accessible to everyone. You get all the power without the complexity.
 
 ## How It Works
 
 ```
-You (Browser)                          Your Server / Mac
+You (Browser/App)                       Your Server / Mac
 ┌──────────────────┐                  ┌──────────────────────┐
-│  ClawSync Editor  │ ── saves to ──> │  GitHub Repository   │
-│  - Edit SOUL.md   │                 │  (source of truth)   │
+│  Pagekeeper UI    │ ── saves to ──> │  GitHub Repository   │
+│  - Edit files     │                 │  (source of truth)   │
 │  - Visual timeline │                 └──────────┬───────────┘
 │  - Branch & merge  │                            │
 └──────────────────┘                   git pull (every 60s)
                                                   │
                                        ┌──────────▼───────────┐
-                                       │  ~/.openclaw/workspace│
+                                       │  Your agent workspace │
                                        │  Agent reads files    │
                                        │  from disk            │
                                        └───────────────────────┘
