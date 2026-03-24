@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { setToken } from "../lib/api";
-import { Zap } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 export default function AuthCallback() {
   const [params] = useSearchParams();
@@ -18,12 +18,13 @@ export default function AuthCallback() {
   }, [params, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-          <Zap className="w-8 h-8 text-white" />
+    <div style={{ minHeight: "100vh", background: "#faf7f2", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Instrument Sans', -apple-system, sans-serif" }}>
+      <style>{"@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Instrument+Sans:wght@400;500;600&display=swap');"}</style>
+      <div style={{ textAlign: "center" }}>
+        <div style={{ width: 56, height: 56, background: "#e8622a", borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+          <Loader2 style={{ width: 28, height: 28, color: "white" }} className="animate-spin" />
         </div>
-        <p className="text-gray-400 text-lg">Connecting your GitHub account...</p>
+        <p style={{ fontSize: 16, color: "#5a5450", fontFamily: "'Fraunces', Georgia, serif" }}>Connecting your GitHub account...</p>
       </div>
     </div>
   );

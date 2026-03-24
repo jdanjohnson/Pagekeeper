@@ -2,65 +2,29 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getTimeline, getCommitDetail } from "../lib/api";
 import {
-  ArrowLeft,
-  Bot,
-  User,
-  Zap,
-  Clock,
-  FileText,
-  Plus,
-  Minus,
-  ChevronDown,
-  ChevronRight,
+  ArrowLeft, Bot, User, Clock, FileText, Plus, Minus, ChevronDown, ChevronRight, Loader2,
 } from "lucide-react";
 
 interface TimelineEntry {
-  sha: string;
-  message: string;
-  author_name: string;
-  author_login: string;
-  author_avatar: string;
-  date: string;
-  source: "human" | "agent" | "clawsync";
+  sha: string; message: string; author_name: string; author_login: string;
+  author_avatar: string; date: string; source: "human" | "agent" | "clawsync";
 }
+interface CommitFile { filename: string; status: string; additions: number; deletions: number; patch: string; }
+interface CommitDetail { sha: string; message: string; date: string; files: CommitFile[]; }
 
-interface CommitFile {
-  filename: string;
-  status: string;
-  additions: number;
-  deletions: number;
-  patch: string;
-}
-
-interface CommitDetail {
-  sha: string;
-  message: string;
-  date: string;
-  files: CommitFile[];
-}
+const C = {
+  cream: '#faf7f2', creamDark: '#f0ebe0', paper: '#ffffff',
+  ink: '#1a1714', inkMid: '#5a5450', inkLight: '#9e9890', inkFaint: '#d4cfc7',
+  claw: '#e8622a', clawLight: '#fde8de', clawMid: '#f4a07a',
+  green: '#2d7a4f', greenLight: '#e0f2e9',
+  blue: '#3b82f6', blueLight: '#dbeafe',
+  purple: '#8b5cf6', purpleLight: '#ede9fe',
+};
 
 const SOURCE_CONFIG = {
-  human: {
-    icon: User,
-    color: "text-blue-400",
-    bg: "bg-blue-500/20",
-    border: "border-blue-500/30",
-    label: "You edited",
-  },
-  agent: {
-    icon: Bot,
-    color: "text-purple-400",
-    bg: "bg-purple-500/20",
-    border: "border-purple-500/30",
-    label: "Agent edited",
-  },
-  clawsync: {
-    icon: Zap,
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/20",
-    border: "border-emerald-500/30",
-    label: "ClawSync",
-  },
+  human: { icon: User, color: C.blue, bg: C.blueLight, label: "You edited" },
+  agent: { icon: Bot, color: C.purple, bg: C.purpleLight, label: "Agent edited" },
+  clawsync: { icon: Clock, color: C.claw, bg: C.clawLight, label: "Pagekeeper" },
 };
 
 export default function Timeline() {
@@ -80,29 +44,18 @@ export default function Timeline() {
 
   const loadTimeline = async () => {
     setLoading(true);
-    try {
-      const data = await getTimeline(owner!, repo!, filterFile || undefined);
-      setTimeline(data.timeline);
-    } catch (e) {
-      console.error(e);
-    }
+    try { const data = await getTimeline(owner!, repo!, filterFile || undefined); setTimeline(data.timeline); }
+    catch (e) { console.error(e); }
     setLoading(false);
   };
 
   const toggleExpand = async (sha: string) => {
-    if (expandedSha === sha) {
-      setExpandedSha(null);
-      return;
-    }
+    if (expandedSha === sha) { setExpandedSha(null); return; }
     setExpandedSha(sha);
     if (!commitDetails[sha]) {
       setLoadingDetail(true);
-      try {
-        const detail = await getCommitDetail(owner!, repo!, sha);
-        setCommitDetails((prev) => ({ ...prev, [sha]: detail }));
-      } catch (e) {
-        console.error(e);
-      }
+      try { const detail = await getCommitDetail(owner!, repo!, sha); setCommitDetails((prev) => ({ ...prev, [sha]: detail })); }
+      catch (e) { console.error(e); }
       setLoadingDetail(false);
     }
   };
@@ -119,96 +72,77 @@ export default function Timeline() {
     return new Date(dateStr).toLocaleDateString();
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString();
-  };
+  const formatDate = (dateStr: string) => new Date(dateStr).toLocaleString();
 
-  // Group timeline by date
   const grouped: Record<string, TimelineEntry[]> = {};
   for (const entry of timeline) {
-    const day = new Date(entry.date).toLocaleDateString("en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    });
+    const day = new Date(entry.date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
     if (!grouped[day]) grouped[day] = [];
     grouped[day].push(entry);
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Top bar */}
-      <nav className="flex items-center justify-between px-6 py-3 border-b border-gray-800">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate(`/agent/${owner}/${repo}`)}
-            className="text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
+    <div style={{ minHeight: '100vh', background: C.cream, color: C.ink, fontFamily: "'Instrument Sans', -apple-system, sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700&family=Instrument+Sans:wght@400;500;600&display=swap');
+        .pk-serif { font-family: 'Fraunces', Georgia, serif; }
+        .pk-sans { font-family: 'Instrument Sans', -apple-system, sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+      `}</style>
+
+      {/* NAV */}
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(250,247,242,0.92)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${C.inkFaint}`, padding: '0 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 60 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <button onClick={() => navigate(`/agent/${owner}/${repo}`)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, display: 'flex', alignItems: 'center' }}>
+            <ArrowLeft style={{ width: 18, height: 18 }} />
           </button>
-          <div className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-emerald-400" />
-            <span className="font-semibold">Timeline</span>
-            <span className="text-gray-500">·</span>
-            <span className="text-gray-400 text-sm">
-              {owner}/{repo}
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Clock style={{ width: 18, height: 18, color: C.claw }} />
+            <span className="pk-serif" style={{ fontSize: 16, fontWeight: 500 }}>Timeline</span>
+            <span style={{ color: C.inkFaint }}>&middot;</span>
+            <span className="pk-sans" style={{ fontSize: 13, color: C.inkLight }}>{owner}/{repo}</span>
           </div>
         </div>
-        <div>
-          <select
-            value={filterFile}
-            onChange={(e) => setFilterFile(e.target.value)}
-            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-emerald-500"
-          >
-            <option value="">All files</option>
-            <option value="SOUL.md">SOUL.md</option>
-            <option value="MEMORY.md">MEMORY.md</option>
-            <option value="USER.md">USER.md</option>
-            <option value="AGENTS.md">AGENTS.md</option>
-            <option value="IDENTITY.md">IDENTITY.md</option>
-            <option value="TOOLS.md">TOOLS.md</option>
-          </select>
-        </div>
+        <select value={filterFile} onChange={(e) => setFilterFile(e.target.value)} className="pk-sans" style={{ background: C.cream, border: `1px solid ${C.inkFaint}`, borderRadius: 8, padding: '6px 12px', fontSize: 13, color: C.inkMid, outline: 'none' }}>
+          <option value="">All files</option>
+          <option value="SOUL.md">SOUL.md</option>
+          <option value="MEMORY.md">MEMORY.md</option>
+          <option value="USER.md">USER.md</option>
+          <option value="AGENTS.md">AGENTS.md</option>
+          <option value="IDENTITY.md">IDENTITY.md</option>
+          <option value="TOOLS.md">TOOLS.md</option>
+        </select>
       </nav>
 
       {/* Legend */}
-      <div className="max-w-3xl mx-auto px-6 pt-6">
-        <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
-          <span className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-blue-500/30 rounded-full border border-blue-500/50" />
-            Your edits
-          </span>
-          <span className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-purple-500/30 rounded-full border border-purple-500/50" />
-            Agent edits
-          </span>
-          <span className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-emerald-500/30 rounded-full border border-emerald-500/50" />
-            ClawSync edits
-          </span>
+      <div style={{ maxWidth: 700, margin: '0 auto', padding: '20px 24px 0' }}>
+        <div className="pk-sans" style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 12, color: C.inkLight, marginBottom: 24 }}>
+          {Object.entries(SOURCE_CONFIG).map(([key, cfg]) => (
+            <span key={key} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{ width: 10, height: 10, background: cfg.bg, borderRadius: '50%', border: `1.5px solid ${cfg.color}` }} />
+              {cfg.label}
+            </span>
+          ))}
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '80px 0' }}>
+          <Loader2 style={{ width: 28, height: 28, color: C.claw }} className="animate-spin" />
         </div>
       ) : timeline.length === 0 ? (
-        <div className="text-center py-20">
-          <Clock className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-500">No changes yet</p>
+        <div style={{ textAlign: 'center', padding: '80px 0' }}>
+          <Clock style={{ width: 40, height: 40, color: C.inkFaint, margin: '0 auto 12px', display: 'block' }} />
+          <p className="pk-sans" style={{ color: C.inkLight }}>No changes yet</p>
         </div>
       ) : (
-        <div className="max-w-3xl mx-auto px-6 pb-12">
+        <div style={{ maxWidth: 700, margin: '0 auto', padding: '0 24px 48px' }}>
           {Object.entries(grouped).map(([day, entries]) => (
-            <div key={day} className="mb-8">
-              <h3 className="text-sm font-semibold text-gray-400 mb-4 sticky top-0 bg-gray-950 py-2">
-                {day}
-              </h3>
-              <div className="relative">
+            <div key={day} style={{ marginBottom: 32 }}>
+              <h3 className="pk-sans" style={{ fontSize: 12, fontWeight: 600, color: C.inkLight, letterSpacing: '.05em', textTransform: 'uppercase', marginBottom: 16, position: 'sticky', top: 60, background: C.cream, padding: '8px 0', zIndex: 10 }}>{day}</h3>
+              <div style={{ position: 'relative' }}>
                 {/* Timeline line */}
-                <div className="absolute left-5 top-0 bottom-0 w-px bg-gray-800" />
+                <div style={{ position: 'absolute', left: 16, top: 0, bottom: 0, width: 1, background: C.inkFaint }} />
 
                 {entries.map((entry) => {
                   const config = SOURCE_CONFIG[entry.source];
@@ -217,119 +151,60 @@ export default function Timeline() {
                   const detail = commitDetails[entry.sha];
 
                   return (
-                    <div key={entry.sha} className="relative pl-14 pb-6">
+                    <div key={entry.sha} style={{ position: 'relative', paddingLeft: 48, paddingBottom: 20 }}>
                       {/* Timeline dot */}
-                      <div
-                        className={`absolute left-3 w-5 h-5 rounded-full ${config.bg} border ${config.border} flex items-center justify-center`}
-                      >
-                        <Icon className={`w-3 h-3 ${config.color}`} />
+                      <div style={{ position: 'absolute', left: 9, width: 16, height: 16, borderRadius: '50%', background: config.bg, border: `1.5px solid ${config.color}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Icon style={{ width: 9, height: 9, color: config.color }} />
                       </div>
 
                       {/* Card */}
-                      <button
-                        onClick={() => toggleExpand(entry.sha)}
-                        className={`w-full text-left bg-gray-900/50 border rounded-xl p-4 transition-all hover:bg-gray-900 ${
-                          isExpanded
-                            ? `${config.border} bg-gray-900`
-                            : "border-gray-800"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className={`text-xs font-medium ${config.color}`}>
-                                {config.label}
-                              </span>
-                              <span className="text-xs text-gray-600">·</span>
-                              <span className="text-xs text-gray-500">
-                                {timeAgo(entry.date)}
-                              </span>
+                      <button onClick={() => toggleExpand(entry.sha)} style={{ width: '100%', textAlign: 'left', background: isExpanded ? C.paper : 'transparent', border: `1px solid ${isExpanded ? C.inkFaint : 'transparent'}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer', transition: 'all .15s' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                          <div style={{ flex: 1 }}>
+                            <div className="pk-sans" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: config.color }}>{config.label}</span>
+                              <span style={{ fontSize: 11, color: C.inkFaint }}>&middot;</span>
+                              <span style={{ fontSize: 11, color: C.inkLight }}>{timeAgo(entry.date)}</span>
                             </div>
-                            <p className="text-sm text-gray-200">
-                              {entry.message}
-                            </p>
+                            <p className="pk-sans" style={{ fontSize: 13, color: C.ink }}>{entry.message}</p>
                             {entry.author_login && (
-                              <div className="flex items-center gap-1.5 mt-2">
-                                {entry.author_avatar && (
-                                  <img
-                                    src={entry.author_avatar}
-                                    alt=""
-                                    className="w-4 h-4 rounded-full"
-                                  />
-                                )}
-                                <span className="text-xs text-gray-500">
-                                  {entry.author_login}
-                                </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                                {entry.author_avatar && <img src={entry.author_avatar} alt="" style={{ width: 16, height: 16, borderRadius: '50%' }} />}
+                                <span className="pk-sans" style={{ fontSize: 11, color: C.inkLight }}>{entry.author_login}</span>
                               </div>
                             )}
                           </div>
-                          {isExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-gray-500 shrink-0" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-gray-500 shrink-0" />
-                          )}
+                          {isExpanded ? <ChevronDown style={{ width: 14, height: 14, color: C.inkLight, flexShrink: 0 }} /> : <ChevronRight style={{ width: 14, height: 14, color: C.inkLight, flexShrink: 0 }} />}
                         </div>
 
                         {/* Expanded detail */}
                         {isExpanded && detail && (
-                          <div
-                            className="mt-4 pt-4 border-t border-gray-800"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.inkFaint}` }} onClick={(e) => e.stopPropagation()}>
                             {detail.files.map((file) => (
-                              <div key={file.filename} className="mb-3">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <FileText className="w-3.5 h-3.5 text-gray-400" />
-                                  <span className="text-xs font-medium text-gray-300">
-                                    {file.filename}
-                                  </span>
-                                  <span className="text-xs text-gray-600">
-                                    {file.status}
-                                  </span>
-                                  {file.additions > 0 && (
-                                    <span className="text-xs text-emerald-400 flex items-center gap-0.5">
-                                      <Plus className="w-3 h-3" />
-                                      {file.additions}
-                                    </span>
-                                  )}
-                                  {file.deletions > 0 && (
-                                    <span className="text-xs text-red-400 flex items-center gap-0.5">
-                                      <Minus className="w-3 h-3" />
-                                      {file.deletions}
-                                    </span>
-                                  )}
+                              <div key={file.filename} style={{ marginBottom: 12 }}>
+                                <div className="pk-sans" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                  <FileText style={{ width: 13, height: 13, color: C.inkLight }} />
+                                  <span style={{ fontSize: 12, fontWeight: 600, color: C.inkMid }}>{file.filename}</span>
+                                  <span style={{ fontSize: 11, color: C.inkLight }}>{file.status}</span>
+                                  {file.additions > 0 && <span style={{ fontSize: 11, color: C.green, display: 'flex', alignItems: 'center', gap: 2 }}><Plus style={{ width: 10, height: 10 }} />{file.additions}</span>}
+                                  {file.deletions > 0 && <span style={{ fontSize: 11, color: '#dc2626', display: 'flex', alignItems: 'center', gap: 2 }}><Minus style={{ width: 10, height: 10 }} />{file.deletions}</span>}
                                 </div>
                                 {file.patch && (
-                                  <pre className="bg-gray-950 rounded-lg p-3 text-xs overflow-x-auto max-h-48 overflow-y-auto">
+                                  <pre style={{ background: C.ink, borderRadius: 10, padding: 12, fontSize: 11, fontFamily: 'monospace', overflowX: 'auto', maxHeight: 200, overflowY: 'auto' }}>
                                     {file.patch.split("\n").map((line, i) => (
-                                      <div
-                                        key={i}
-                                        className={
-                                          line.startsWith("+")
-                                            ? "text-emerald-400"
-                                            : line.startsWith("-")
-                                            ? "text-red-400"
-                                            : line.startsWith("@@")
-                                            ? "text-blue-400"
-                                            : "text-gray-500"
-                                        }
-                                      >
-                                        {line}
-                                      </div>
+                                      <div key={i} style={{ color: line.startsWith("+") ? '#4ade80' : line.startsWith("-") ? '#f87171' : line.startsWith("@@") ? C.blue : C.inkLight }}>{line}</div>
                                     ))}
                                   </pre>
                                 )}
                               </div>
                             ))}
-                            <div className="text-xs text-gray-600 mt-2">
-                              {formatDate(detail.date)} · {entry.sha.slice(0, 7)}
-                            </div>
+                            <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginTop: 8 }}>{formatDate(detail.date)} &middot; {entry.sha.slice(0, 7)}</div>
                           </div>
                         )}
 
                         {isExpanded && loadingDetail && !detail && (
-                          <div className="mt-4 pt-4 border-t border-gray-800 flex justify-center">
-                            <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                          <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${C.inkFaint}`, display: 'flex', justifyContent: 'center' }}>
+                            <Loader2 style={{ width: 18, height: 18, color: C.claw }} className="animate-spin" />
                           </div>
                         )}
                       </button>
