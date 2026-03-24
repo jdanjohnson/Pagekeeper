@@ -1,8 +1,16 @@
-# ClawSync
+# ClawSync (Pagekeeper)
 
 A beginner-friendly file sync system for AI agent knowledge management. Think of it as GitHub with a better UI — designed for non-developers managing AI agent files like SOUL.md, MEMORY.md, and more.
 
 ClawSync keeps your OpenClaw (and any file-reading AI agent) running on the latest version of your knowledge files. Edit in the browser, and your agents pick up changes automatically.
+
+## Screenshots
+
+### Web App — Landing Page
+![Landing Page](screenshots/landing-page.png)
+
+### HTML Local Edition — Login
+![HTML Local Login](screenshots/html-login.png)
 
 ## How It Works
 
