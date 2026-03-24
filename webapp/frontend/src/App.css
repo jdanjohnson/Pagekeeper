@@ -1,0 +1,72 @@
+/* Pagekeeper global styles */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,300;1,9..144,500&family=Instrument+Sans:wght@400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #faf7f2;
+  color: #1a1714;
+  font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* MD Editor overrides for Pagekeeper theme */
+.w-md-editor {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #1a1714 !important;
+}
+
+.w-md-editor-text-pre > code,
+.w-md-editor-text-input,
+.w-md-editor-text {
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  color: #1a1714 !important;
+}
+
+.wmde-markdown {
+  background: transparent !important;
+  color: #1a1714 !important;
+}
+
+.w-md-editor-toolbar {
+  background: #faf7f2 !important;
+  border-bottom: 1px solid #d4cfc7 !important;
+}
+
+.w-md-editor-toolbar svg {
+  color: #5a5450 !important;
+}
+
+.w-md-editor-toolbar li > button:hover {
+  background: #f0ebe0 !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4cfc7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9e9890;
+}
+
+/* Animate spin for loaders */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.animate-spin {
+  animation: spin 1s linear infinite;
+}

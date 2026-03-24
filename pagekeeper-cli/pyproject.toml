@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pagekeeper"
+version = "0.1.0"
+description = "Pagekeeper - A beginner-friendly UI for managing AI agent knowledge files via GitHub"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi[standard]>=0.100.0",
+    "httpx>=0.24.0",
+    "python-dotenv>=1.0.0",
+    "uvicorn>=0.23.0",
+]
+
+[project.scripts]
+pagekeeper = "pagekeeper.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+pagekeeper = ["static/**/*", "static/*"]
