@@ -13,3 +13,5 @@ __pycache__/
 .vite/
 .cache/
 *.log
+webapp/static/
+write_*.py
