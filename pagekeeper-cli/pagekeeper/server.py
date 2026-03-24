@@ -32,8 +32,8 @@ sessions: dict[str, dict] = {}
 
 
 def get_github_token(request: Request) -> str:
-    # Check X-ClawSync-Token first (tunnel proxy may occupy Authorization header)
-    auth = request.headers.get("X-ClawSync-Token", "")
+    # Check X-Pagekeeper-Token first (tunnel proxy may occupy Authorization header)
+    auth = request.headers.get("X-Pagekeeper-Token", "")
     if not auth:
         auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
@@ -165,7 +165,7 @@ async def get_me(github_token: str = Depends(get_github_token)):
 
 # ─── Repos (Agents) ────────────────────────────────────────────
 
-CLAWSYNC_TOPIC = "clawsync-agent"
+PAGEKEEPER_TOPIC = "pagekeeper-agent"
 
 
 @app.get("/api/repos")
@@ -184,7 +184,7 @@ async def list_repos(github_token: str = Depends(get_github_token)):
     for repo in all_repos:
         topics = repo.get("topics", [])
         name = repo.get("name", "")
-        if CLAWSYNC_TOPIC in topics or name.startswith("clawsync-") or name.startswith("openclaw-"):
+        if PAGEKEEPER_TOPIC in topics or name.startswith("pagekeeper-") or name.startswith("openclaw-"):
             agent_repos.append({
                 "id": repo["id"],
                 "name": repo["name"],
@@ -230,7 +230,7 @@ class ImportRepoRequest(BaseModel):
 
 @app.post("/api/repos/import")
 async def import_repo(body: ImportRepoRequest, github_token: str = Depends(get_github_token)):
-    """Import an existing repo into ClawSync by adding the clawsync-agent topic."""
+    """Import an existing repo into Pagekeeper by adding the pagekeeper-agent topic."""
     owner, repo = body.full_name.split("/", 1)
     headers = {
         "Authorization": f"Bearer {github_token}",
@@ -246,9 +246,9 @@ async def import_repo(body: ImportRepoRequest, github_token: str = Depends(get_g
             raise HTTPException(status_code=resp.status_code, detail="Repo not found")
         current_topics = resp.json().get("names", [])
 
-        # Add clawsync-agent topic if not already present
-        if CLAWSYNC_TOPIC not in current_topics:
-            current_topics.append(CLAWSYNC_TOPIC)
+        # Add pagekeeper-agent topic if not already present
+        if PAGEKEEPER_TOPIC not in current_topics:
+            current_topics.append(PAGEKEEPER_TOPIC)
             await client.put(
                 f"https://api.github.com/repos/{owner}/{repo}/topics",
                 headers=headers,
@@ -296,7 +296,7 @@ async def import_repo(body: ImportRepoRequest, github_token: str = Depends(get_g
 
 class CreateRepoRequest(BaseModel):
     name: str
-    description: str = "OpenClaw agent knowledge managed by ClawSync"
+    description: str = "OpenClaw agent knowledge managed by Pagekeeper"
     private: bool = True
     template: str = "default"
 
@@ -1069,7 +1069,7 @@ async def create_repo(body: CreateRepoRequest, github_token: str = Depends(get_g
         repo_name = repo_data["name"]
         await client.put(
             f"https://api.github.com/repos/{owner}/{repo_name}/topics",
-            json={"names": [CLAWSYNC_TOPIC]},
+            json={"names": [PAGEKEEPER_TOPIC]},
             headers={
                 "Authorization": f"Bearer {github_token}",
                 "Accept": "application/vnd.github+json",
@@ -1081,7 +1081,7 @@ async def create_repo(body: CreateRepoRequest, github_token: str = Depends(get_g
             await client.put(
                 f"https://api.github.com/repos/{owner}/{repo_name}/contents/{filename}",
                 json={
-                    "message": f"Initialize {filename} via ClawSync",
+                    "message": f"Initialize {filename} via Pagekeeper",
                     "content": base64.b64encode(content.encode()).decode(),
                 },
                 headers={
@@ -1185,7 +1185,7 @@ async def update_file(
     body: UpdateFileRequest,
     github_token: str = Depends(get_github_token),
 ):
-    commit_message = body.message or f"Update {file_path} via ClawSync"
+    commit_message = body.message or f"Update {file_path} via Pagekeeper"
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}"
     async with httpx.AsyncClient() as client:
         resp = await client.put(
@@ -1216,7 +1216,7 @@ async def create_file(
     body: CreateFileRequest,
     github_token: str = Depends(get_github_token),
 ):
-    commit_message = body.message or f"Create {file_path} via ClawSync"
+    commit_message = body.message or f"Create {file_path} via Pagekeeper"
     url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}"
     async with httpx.AsyncClient() as client:
         resp = await client.put(
@@ -1267,8 +1267,8 @@ async def get_timeline(
         message = c.get("message", "")
 
         source = "human"
-        if "via ClawSync" in message:
-            source = "clawsync"
+        if "via Pagekeeper" in message:
+            source = "pagekeeper"
         elif "openclaw" in message.lower() or "agent" in message.lower():
             source = "agent"
 
@@ -1320,22 +1320,22 @@ async def get_commit_detail(owner: str, repo: str, sha: str, github_token: str =
 
 @app.post("/api/repos/{owner}/{repo}/sync-test")
 async def create_sync_test(owner: str, repo: str, github_token: str = Depends(get_github_token)):
-    """Create a .clawsync-test file with a timestamp. User checks if it appears on VPS."""
+    """Create a .pagekeeper-test file with a timestamp. User checks if it appears on VPS."""
     from datetime import datetime, timezone
     timestamp = datetime.now(timezone.utc).isoformat()
     test_id = secrets.token_hex(4)
-    content = f"ClawSync Sync Test\nID: {test_id}\nCreated: {timestamp}\n\nIf you can see this file on your VPS, sync is working!\nRun: cat ~/.openclaw/workspace/.clawsync-test\n"
+    content = f"Pagekeeper Sync Test\nID: {test_id}\nCreated: {timestamp}\n\nIf you can see this file on your VPS, sync is working!\nRun: cat ~/.openclaw/workspace/.pagekeeper-test\n"
     encoded = base64.b64encode(content.encode()).decode()
 
     # Check if file already exists (need sha to update)
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/.clawsync-test"
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/.pagekeeper-test"
     async with httpx.AsyncClient() as client:
         check = await client.get(url, headers={
             "Authorization": f"Bearer {github_token}",
             "Accept": "application/vnd.github+json",
         })
         body: dict = {
-            "message": f"sync test {test_id} via ClawSync",
+            "message": f"sync test {test_id} via Pagekeeper",
             "content": encoded,
         }
         if check.status_code == 200:
@@ -1351,7 +1351,7 @@ async def create_sync_test(owner: str, repo: str, github_token: str = Depends(ge
     return {
         "test_id": test_id,
         "timestamp": timestamp,
-        "command": f"cat ~/.openclaw/workspace/.clawsync-test",
+        "command": f"cat ~/.openclaw/workspace/.pagekeeper-test",
         "expected": f"ID: {test_id}",
     }
 
@@ -1380,9 +1380,9 @@ async def get_sync_status(owner: str, repo: str, github_token: str = Depends(get
                 "author": c["commit"]["author"]["name"],
             }
 
-        # Check if .clawsync-test exists
+        # Check if .pagekeeper-test exists
         test_resp = await client.get(
-            f"https://api.github.com/repos/{owner}/{repo}/contents/.clawsync-test",
+            f"https://api.github.com/repos/{owner}/{repo}/contents/.pagekeeper-test",
             headers={
                 "Authorization": f"Bearer {github_token}",
                 "Accept": "application/vnd.github+json",
@@ -1415,8 +1415,8 @@ async def get_sync_status(owner: str, repo: str, github_token: str = Depends(get
 
 @app.delete("/api/repos/{owner}/{repo}/sync-test")
 async def delete_sync_test(owner: str, repo: str, github_token: str = Depends(get_github_token)):
-    """Clean up the .clawsync-test file after testing."""
-    url = f"https://api.github.com/repos/{owner}/{repo}/contents/.clawsync-test"
+    """Clean up the .pagekeeper-test file after testing."""
+    url = f"https://api.github.com/repos/{owner}/{repo}/contents/.pagekeeper-test"
     async with httpx.AsyncClient() as client:
         check = await client.get(url, headers={
             "Authorization": f"Bearer {github_token}",
@@ -1427,7 +1427,7 @@ async def delete_sync_test(owner: str, repo: str, github_token: str = Depends(ge
 
         sha = check.json()["sha"]
         resp = await client.delete(url, json={
-            "message": "clean up sync test via ClawSync",
+            "message": "clean up sync test via Pagekeeper",
             "sha": sha,
         }, headers={
             "Authorization": f"Bearer {github_token}",
@@ -1558,7 +1558,7 @@ class MergeBranchRequest(BaseModel):
 @app.post("/api/repos/{owner}/{repo}/merge")
 async def merge_branch(owner: str, repo: str, body: MergeBranchRequest, github_token: str = Depends(get_github_token)):
     """Merge one branch into another (like merging a PR)."""
-    message = body.commit_message or f"Merge {body.head} into {body.base} via ClawSync"
+    message = body.commit_message or f"Merge {body.head} into {body.base} via Pagekeeper"
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"https://api.github.com/repos/{owner}/{repo}/merges",
@@ -1600,7 +1600,7 @@ async def delete_branch(owner: str, repo: str, branch: str, github_token: str = 
 
 # ─── Serve Frontend Static Files ─────────────────────────────
 
-STATIC_DIR = Path(os.environ.get("CLAWSYNC_STATIC_DIR", str(Path(__file__).parent / "static")))
+STATIC_DIR = Path(__file__).parent / "static"
 
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets")), name="static-assets")

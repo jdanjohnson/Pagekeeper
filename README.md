@@ -48,12 +48,12 @@ You (Browser/App)                       Your Server / Mac
 
 **No database.** GitHub is the backend — repos store your agent files, commits are your version history, and the GitHub API handles everything.
 
-## Three Ways to Use ClawSync
+## Three Ways to Use Pagekeeper
 
 | Version | Best For | Setup |
 |---------|----------|-------|
 | **Web App** | Teams, hosted deployment | Deploy frontend + backend |
-| **CLI** | Developers, local use | `pip install clawsync` |
+| **CLI** | Developers, local use | `pip install pagekeeper` |
 | **HTML Local** | Anyone, zero setup | Double-click `index.html` |
 
 ---
@@ -63,9 +63,9 @@ You (Browser/App)                       Your Server / Mac
 A single HTML file that runs entirely in your browser. No server, no install, no dependencies.
 
 ### Quick Start
-1. Download `clawsync-local/index.html`
+1. Download `pagekeeper-local/index.html`
 2. Open it in your browser (double-click or drag to browser)
-3. Paste a GitHub Personal Access Token ([generate one here](https://github.com/settings/tokens/new?scopes=repo,delete_repo&description=ClawSync+Local))
+3. Paste a GitHub Personal Access Token ([generate one here](https://github.com/settings/tokens/new?scopes=repo,delete_repo&description=Pagekeeper+Local))
 4. Start managing your agent files
 
 ### Features
@@ -84,12 +84,12 @@ A single HTML file that runs entirely in your browser. No server, no install, no
 
 ## 2. CLI Edition
 
-A pip-installable package that runs the full ClawSync app locally.
+A pip-installable package that runs the full Pagekeeper app locally.
 
 ### Quick Start
 ```bash
-pip install clawsync
-clawsync
+pip install pagekeeper
+pagekeeper
 ```
 
 On first run, it walks you through GitHub auth setup. After that, it opens `localhost:8000` in your browser with the full app.
@@ -97,14 +97,14 @@ On first run, it walks you through GitHub auth setup. After that, it opens `loca
 ### Features
 - Everything in the web app
 - PAT-based auth (no OAuth needed)
-- Saves credentials to `~/.clawsync.env`
+- Saves credentials to `~/.pagekeeper.env`
 - Works on Mac, Linux, Windows
 
 ### Build from Source
 ```bash
-cd clawsync-cli
+cd pagekeeper-cli
 pip install -e .
-clawsync
+pagekeeper
 ```
 
 ---
@@ -116,13 +116,13 @@ A full React + FastAPI web application for hosted/team deployment.
 ### Quick Start
 ```bash
 # Backend
-cd clawsync-backend
+cd pagekeeper-backend
 poetry install
 cp .env.example .env  # Add your GitHub OAuth credentials
 poetry run fastapi dev app/main.py --port 8000
 
 # Frontend
-cd clawsync-frontend
+cd pagekeeper-frontend
 npm install
 cp .env.example .env  # Set VITE_API_URL
 npm run dev
@@ -136,14 +136,14 @@ npm run dev
 
 ### Environment Variables
 
-**Backend** (`clawsync-backend/.env`):
+**Backend** (`pagekeeper-backend/.env`):
 ```
 GITHUB_CLIENT_ID=your_client_id
 GITHUB_CLIENT_SECRET=your_client_secret
 FRONTEND_URL=http://localhost:5173
 ```
 
-**Frontend** (`clawsync-frontend/.env`):
+**Frontend** (`pagekeeper-frontend/.env`):
 ```
 VITE_API_URL=http://localhost:8000
 ```
@@ -162,12 +162,12 @@ VITE_API_URL=http://localhost:8000
 An Electron wrapper for the web app that runs as a native desktop application.
 
 ### Pre-built Downloads
-- **Mac (x64)**: `ClawSync-0.1.0-mac-x64.zip` — unzip and drag to Applications
-- **Linux**: `ClawSync-0.1.0.AppImage` — make executable and run
+- **Mac (x64)**: `Pagekeeper-0.1.0-mac-x64.zip` — unzip and drag to Applications
+- **Linux**: `Pagekeeper-0.1.0.AppImage` — make executable and run
 
 ### Build from Source
 ```bash
-cd clawsync-desktop
+cd pagekeeper-desktop
 npm install
 npm run build:linux  # or npm run build:mac on a Mac
 ```
@@ -178,7 +178,7 @@ npm run build:linux  # or npm run build:mac on a Mac
 
 ## Syncing to Your Server / Mac
 
-ClawSync edits files on GitHub. To get those changes onto your server or Mac, you set up a simple git-based sync.
+Pagekeeper edits files on GitHub. To get those changes onto your server or Mac, you set up a simple git-based sync.
 
 ### VPS / Server (One-way pull)
 
@@ -194,29 +194,29 @@ git clone git@github.com:YOU/YOUR-AGENT.git ~/.openclaw/workspace
 
 ```bash
 # 1. Clone the repo
-git clone git@github.com:YOU/YOUR-AGENT.git ~/ClawSync/YOUR-AGENT
+git clone git@github.com:YOU/YOUR-AGENT.git ~/Pagekeeper/YOUR-AGENT
 
-# 2. Save this as ~/clawsync-sync.sh
+# 2. Save this as ~/pagekeeper-sync.sh
 #!/bin/bash
 while true; do
-  cd ~/ClawSync/YOUR-AGENT
+  cd ~/Pagekeeper/YOUR-AGENT
   git pull --quiet
   git add -A && git diff --cached --quiet || git commit -m "Auto-sync" && git push --quiet
   sleep 60
 done
 
 # 3. Make it executable and run
-chmod +x ~/clawsync-sync.sh
-nohup ~/clawsync-sync.sh &
+chmod +x ~/pagekeeper-sync.sh
+nohup ~/pagekeeper-sync.sh &
 ```
 
 ### Local Folder Sync
 
-Same as Mac sync — pick any folder, clone the repo there, and run the sync script. The setup wizard in ClawSync gives you pre-filled commands with your actual repo name.
+Same as Mac sync — pick any folder, clone the repo there, and run the sync script. The setup wizard in Pagekeeper gives you pre-filled commands with your actual repo name.
 
 ### Verifying Sync
 
-Use the **Sync Check** feature in ClawSync:
+Use the **Sync Check** feature in Pagekeeper:
 1. Click "Sync Check" in the editor sidebar
 2. Click "Send Sync Test" — creates a test file in your GitHub repo
 3. Wait 1-2 minutes for the cron/sync to pull
@@ -226,7 +226,7 @@ Use the **Sync Check** feature in ClawSync:
 
 ## Templates
 
-ClawSync comes with 6 full assistant templates:
+Pagekeeper comes with 6 full assistant templates:
 
 | Template | Description |
 |----------|-------------|
@@ -257,27 +257,27 @@ This gives you the safety of git branching without ever touching the terminal.
 ## Architecture
 
 ```
-clawsync/
-├── clawsync-frontend/     # React + Vite frontend (web app)
+pagekeeper/
+├── pagekeeper-frontend/     # React + Vite frontend (web app)
 │   ├── src/
 │   │   ├── pages/         # Dashboard, AgentDetail, Timeline, Landing
 │   │   ├── lib/           # API client, utilities
 │   │   └── components/    # Shared components
 │   └── package.json
-├── clawsync-backend/      # FastAPI backend (GitHub API proxy + OAuth)
+├── pagekeeper-backend/      # FastAPI backend (GitHub API proxy + OAuth)
 │   ├── app/
 │   │   └── main.py        # All routes: auth, repos, files, branches
 │   └── pyproject.toml
-├── clawsync-cli/          # Pip-installable CLI package
-│   ├── clawsync/
+├── pagekeeper-cli/          # Pip-installable CLI package
+│   ├── pagekeeper/
 │   │   ├── cli.py         # Entry point
 │   │   └── server.py      # Embedded FastAPI server
 │   └── pyproject.toml
-├── clawsync-desktop/      # Electron desktop wrapper
+├── pagekeeper-desktop/      # Electron desktop wrapper
 │   ├── main.js            # Electron main process
 │   ├── server/            # Embedded backend for desktop
 │   └── package.json
-└── clawsync-local/        # Standalone HTML edition
+└── pagekeeper-local/        # Standalone HTML edition
     └── index.html         # Single file, all features
 ```
 

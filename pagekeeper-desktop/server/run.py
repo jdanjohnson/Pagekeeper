@@ -1,4 +1,4 @@
-"""Standalone runner for ClawSync server inside Electron app."""
+"""Standalone runner for Pagekeeper server inside Electron app."""
 import sys
 import os
 
@@ -6,13 +6,13 @@ import os
 sys.path.insert(0, os.path.dirname(__file__))
 
 # Override the static dir to point to our bundled static files
-os.environ.setdefault("CLAWSYNC_STATIC_DIR", os.path.join(os.path.dirname(__file__), "static"))
+os.environ.setdefault("PAGEKEEPER_STATIC_DIR", os.path.join(os.path.dirname(__file__), "static"))
 
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 18923
 
     # Try to load saved credentials
-    env_path = os.path.expanduser("~/.clawsync.env")
+    env_path = os.path.expanduser("~/.pagekeeper.env")
     if os.path.exists(env_path):
         with open(env_path) as f:
             for line in f:

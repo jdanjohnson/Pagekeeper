@@ -110,7 +110,7 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    title: "ClawSync",
+    title: "Pagekeeper",
     titleBarStyle: "hiddenInset",
     backgroundColor: "#030712",
     webPreferences: {
@@ -145,7 +145,7 @@ app.on("ready", async () => {
         <body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#030712;color:white;font-family:-apple-system,system-ui,sans-serif;border-radius:16px;">
           <div style="text-align:center">
             <div style="font-size:48px;margin-bottom:16px">&#9889;</div>
-            <div style="font-size:24px;font-weight:bold;margin-bottom:8px">ClawSync</div>
+            <div style="font-size:24px;font-weight:bold;margin-bottom:8px">Pagekeeper</div>
             <div style="color:#6ee7b7;font-size:14px">Starting server...</div>
           </div>
         </body>
@@ -157,7 +157,7 @@ app.on("ready", async () => {
     createWindow();
   } catch (err) {
     dialog.showErrorBox(
-      "ClawSync Error",
+      "Pagekeeper Error",
       `Failed to start: ${err.message}\n\nMake sure Python 3.10+ is installed with pip packages: fastapi, httpx, uvicorn`
     );
     app.quit();

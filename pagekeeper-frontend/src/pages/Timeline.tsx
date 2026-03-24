@@ -7,7 +7,7 @@ import {
 
 interface TimelineEntry {
   sha: string; message: string; author_name: string; author_login: string;
-  author_avatar: string; date: string; source: "human" | "agent" | "clawsync";
+  author_avatar: string; date: string; source: "human" | "agent" | "pagekeeper";
 }
 interface CommitFile { filename: string; status: string; additions: number; deletions: number; patch: string; }
 interface CommitDetail { sha: string; message: string; date: string; files: CommitFile[]; }
@@ -24,7 +24,7 @@ const C = {
 const SOURCE_CONFIG = {
   human: { icon: User, color: C.blue, bg: C.blueLight, label: "You edited" },
   agent: { icon: Bot, color: C.purple, bg: C.purpleLight, label: "Agent edited" },
-  clawsync: { icon: Clock, color: C.claw, bg: C.clawLight, label: "Pagekeeper" },
+  pagekeeper: { icon: Clock, color: C.claw, bg: C.clawLight, label: "Pagekeeper" },
 };
 
 export default function Timeline() {
