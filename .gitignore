@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+.env
+.env.local
+*.whl
+*.AppImage
+*.zip
+*.dmg
+.vite/
+.cache/
+*.log

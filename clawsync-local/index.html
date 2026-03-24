@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClawSync - Local Edition</title>
+<style>
+:root{--bg:#0a0a0f;--sidebar:#111118;--card:#16161f;--border:#1e1e2e;--text:#e4e4e7;--muted:#71717a;--accent:#10b981;--accent-dim:rgba(16,185,129,0.1);--danger:#ef4444;--purple:#a855f7;--purple-dim:rgba(168,85,247,0.1);--blue:#3b82f6;--blue-dim:rgba(59,130,246,0.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+.login-screen{display:flex;align-items:center;justify-content:center;height:100vh;background:linear-gradient(135deg,#0a0a0f 0%,#111827 100%)}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:48px;max-width:480px;width:90%;text-align:center}
+.login-box h1{font-size:32px;margin-bottom:8px}.login-box h1 span{color:var(--accent)}
+.login-box p{color:var(--muted);margin-bottom:32px;font-size:14px}
+.login-box label{display:block;text-align:left;font-size:13px;color:var(--muted);margin-bottom:6px}
+.login-box input{width:100%;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;margin-bottom:16px;outline:none}
+.login-box input:focus{border-color:var(--accent)}
+.login-box .help-text{font-size:12px;color:var(--muted);margin-bottom:24px;text-align:left}
+.login-box .help-text a{color:var(--accent);text-decoration:none}
+.btn{padding:12px 24px;border-radius:10px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{opacity:0.9;transform:translateY(-1px)}.btn-primary:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-sm{padding:8px 14px;font-size:12px;border-radius:8px}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-purple{background:var(--purple-dim);color:var(--purple);border:1px solid rgba(168,85,247,0.3)}
+.btn-blue{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(59,130,246,0.3)}
+.btn-full{width:100%;justify-content:center}
+.error-msg{color:var(--danger);font-size:13px;margin-bottom:12px}
+.app{display:flex;height:100vh}.app-col{display:flex;flex-direction:column;height:100vh;width:100%}
+.sidebar{width:280px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-header{padding:20px;border-bottom:1px solid var(--border)}.sidebar-header h2{font-size:18px;cursor:pointer}.sidebar-header h2 span{color:var(--accent)}
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px}
+.nav-section h3{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:4px 8px;margin-bottom:4px}
+.nav-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:13px;color:var(--text);border:1px solid transparent;transition:all 0.15s;width:100%;background:none;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,0.03)}.nav-item.active{background:var(--accent-dim);border-color:rgba(16,185,129,0.3);color:var(--accent)}
+.nav-item .icon{width:18px;text-align:center;opacity:0.6;flex-shrink:0;margin-top:2px}.nav-item.active .icon{opacity:1}
+.nav-item .path-label{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-footer{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--sidebar);flex-wrap:wrap;gap:8px}
+.topbar h3{font-size:15px;white-space:nowrap}.topbar .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.branch-bar{padding:8px 24px;border-bottom:1px solid var(--border);background:rgba(17,17,24,0.5);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.branch-picker{position:relative}
+.branch-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:var(--card);border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:13px}.branch-btn:hover{border-color:rgba(168,85,247,0.5)}
+.branch-dropdown{position:absolute;top:100%;left:0;margin-top:4px;background:var(--card);border:1px solid var(--border);border-radius:12px;min-width:240px;max-height:280px;overflow-y:auto;z-index:50;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.branch-dropdown button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--text);cursor:pointer;font-size:13px;text-align:left}.branch-dropdown button:hover{background:rgba(255,255,255,0.03)}.branch-dropdown button.active{color:var(--purple);background:var(--purple-dim)}
+.branch-dropdown .divider{border-top:1px solid var(--border);margin:4px 0}
+.editor-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.editor-area textarea{flex:1;background:var(--bg);color:var(--text);border:none;padding:24px;font-family:'SF Mono','Fira Code','Cascadia Code',monospace;font-size:14px;line-height:1.7;resize:none;outline:none;width:100%}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--sidebar)}
+.tab{padding:10px 20px;font-size:13px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none}.tab:hover{color:var(--text)}.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.preview{flex:1;overflow-y:auto;padding:24px}
+.preview h1,.preview h2,.preview h3,.preview h4{margin:20px 0 10px}.preview h1{font-size:28px;border-bottom:1px solid var(--border);padding-bottom:8px}.preview h2{font-size:22px}.preview h3{font-size:18px}
+.preview p{margin:8px 0;line-height:1.7}.preview ul,.preview ol{margin:8px 0;padding-left:24px}.preview li{margin:4px 0;line-height:1.6}
+.preview code{background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;font-family:'SF Mono',monospace;font-size:13px}
+.preview pre{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto;margin:12px 0}.preview pre code{background:none;padding:0}
+.preview blockquote{border-left:3px solid var(--accent);padding-left:16px;color:var(--muted);margin:12px 0}.preview a{color:var(--accent)}.preview hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+.dashboard{flex:1;overflow-y:auto;padding:32px}.dashboard h2{font-size:24px;margin-bottom:4px}.dashboard .subtitle{color:var(--muted);font-size:14px;margin-bottom:24px}
+.repo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.repo-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all 0.2s}.repo-card:hover{border-color:rgba(16,185,129,0.4);transform:translateY(-2px)}
+.repo-card h4{font-size:15px;margin-bottom:4px}.repo-card p{font-size:12px;color:var(--muted)}.repo-card .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10px;background:var(--accent-dim);color:var(--accent);margin-top:8px}
+.new-repo-card{border-style:dashed;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted);min-height:120px}.new-repo-card:hover{color:var(--accent)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:560px;width:90%;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:18px;margin-bottom:16px}.modal label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;margin-top:16px}
+.modal input,.modal select{width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}.modal input:focus,.modal select:focus{border-color:var(--accent)}
+.modal .btn-row{display:flex;gap:8px;margin-top:24px;justify-content:flex-end}
+.repo-list{max-height:300px;overflow-y:auto;margin-top:12px}
+.repo-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent}.repo-list-item:hover{background:rgba(255,255,255,0.03)}
+.template-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:12px}
+.template-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:all 0.15s}.template-card:hover{border-color:rgba(16,185,129,0.4)}.template-card.selected{border-color:var(--accent);background:var(--accent-dim)}
+.template-card .emoji{font-size:24px;margin-bottom:6px}.template-card .name{font-size:12px;font-weight:600}
+.timeline-view{flex:1;overflow-y:auto;padding:32px;max-width:800px}
+.timeline-item{position:relative;padding-left:28px;padding-bottom:24px;border-left:2px solid var(--border);margin-left:8px}.timeline-item:last-child{border-left-color:transparent}
+.timeline-dot{position:absolute;left:-7px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+.timeline-item .commit-msg{font-size:14px;font-weight:500;margin-bottom:4px}.timeline-item .commit-meta{font-size:12px;color:var(--muted)}
+.timeline-item .commit-sha{font-family:'SF Mono',monospace;font-size:11px;color:var(--muted);background:var(--card);padding:2px 6px;border-radius:4px}
+.timeline-day{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;margin-top:8px;padding-left:28px;margin-left:8px}
+.sync-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}.sync-panel h4{font-size:15px;margin-bottom:12px}
+.sync-step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}.sync-step:last-child{border-bottom:none}
+.sync-step .step-num{width:24px;height:24px;border-radius:50%;background:var(--accent-dim);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.sync-step .step-title{font-size:13px;font-weight:600;margin-bottom:4px}.sync-step .step-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.code-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-family:'SF Mono',monospace;font-size:12px;margin-top:8px;position:relative;overflow-x:auto;white-space:pre;color:var(--accent)}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px}.copy-btn:hover{color:var(--accent);border-color:var(--accent)}
+.platform-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0}
+.platform-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;text-align:center;transition:all 0.15s}.platform-card:hover{border-color:rgba(16,185,129,0.4)}.platform-card.selected{border-color:var(--accent);background:var(--accent-dim)}
+.platform-card .p-emoji{font-size:32px;margin-bottom:8px}.platform-card .p-name{font-size:14px;font-weight:600}.platform-card .p-desc{font-size:11px;color:var(--muted);margin-top:4px}
+.diff-container{flex:1;overflow-y:auto;padding:24px}
+.diff-file{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden}
+.diff-file-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.diff-file-name{font-family:'SF Mono',monospace;font-size:13px}.diff-file-stats .add{color:var(--accent)}.diff-file-stats .del{color:var(--danger)}
+.diff-lines{font-family:'SF Mono',monospace;font-size:12px;line-height:1.6;overflow-x:auto}
+.diff-line{padding:1px 16px;white-space:pre}.diff-line.add{background:rgba(16,185,129,0.08);color:#86efac}.diff-line.del{background:rgba(239,68,68,0.08);color:#fca5a5}.diff-line.hunk{background:rgba(59,130,246,0.08);color:var(--blue)}
+.merge-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin:16px 24px}
+.merge-panel h4{font-size:15px;margin-bottom:12px}.merge-panel input{margin-bottom:12px;width:100%;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;outline:none}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-screen{display:flex;align-items:center;justify-content:center;height:100%;gap:12px;color:var(--muted)}
+.folder-heading{display:flex;align-items:center;gap:6px;padding:4px 8px;color:var(--muted);font-size:11px;margin-top:8px}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:8px}.empty-state .big-icon{font-size:48px;opacity:0.3}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.wizard-steps{display:flex;gap:4px;margin-bottom:20px}.wizard-step{flex:1;height:4px;border-radius:2px;background:var(--border)}.wizard-step.done{background:var(--accent)}.wizard-step.current{background:var(--accent);opacity:0.6}
+.search-input{margin-bottom:12px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const TOPIC="clawsync-agent",SK="clawsync_pat",UK="clawsync_user";
+const TEMPLATES={
+default:{name:"Default Agent",emoji:"\u{1F916}",files:{"SOUL.md":"# Soul\n\nYou are a helpful, knowledgeable AI assistant.\n\n## Personality\n- Clear and concise communicator\n- Proactive problem solver\n- Honest about limitations\n\n## Communication Style\n- Use plain language\n- Break complex topics into steps\n- Ask clarifying questions when needed\n","MEMORY.md":"# Memory\n\n## Key Facts\n- [Add important context here]\n\n## Preferences\n- [User preferences go here]\n","USER.md":"# User Profile\n\n## Name\n[Your name]\n\n## Role\n[Your role/title]\n\n## Goals\n- [Primary goal]\n- [Secondary goal]\n","AGENTS.md":"# Agents\n\n## Primary Agent\n- **Role**: General assistant\n- **Capabilities**: Research, writing, analysis, coding help\n\n## Workflows\n1. User asks a question\n2. Agent checks MEMORY.md for context\n3. Agent responds using SOUL.md personality\n4. Agent updates MEMORY.md with new information\n"}},
+support:{name:"Support Bot",emoji:"\u{1F3A7}",files:{"SOUL.md":"# Soul - Support Agent\n\nYou are a patient, empathetic customer support specialist.\n\n## Tone\n- Warm and professional\n- Never blame the customer\n- Always offer next steps\n\n## Escalation Rules\n- Billing disputes over $100 -> escalate to manager\n- Technical issues unresolved after 2 attempts -> escalate to engineering\n","MEMORY.md":"# Memory - Support Context\n\n## Known Issues\n- [List current known bugs/outages]\n\n## FAQ\n- Q: [Common question]\n  A: [Standard answer]\n","USER.md":"# Company Profile\n\n## Company\n[Company Name]\n\n## Product\n[Product/Service name]\n","AGENTS.md":"# Support Team Agents\n\n## Triage Agent\n- Categorizes incoming tickets\n- Routes to appropriate specialist\n\n## Resolution Agent\n- Handles Tier 1 support\n"}},
+personal:{name:"Personal Assistant",emoji:"\u{1F4CB}",files:{"SOUL.md":"# Soul - Personal Assistant\n\nYou are a proactive personal assistant and chief of staff.\n\n## Daily Routine\n- Morning: Summarize today's priorities\n- Midday: Check progress\n- Evening: Plan tomorrow\n\n## Communication\n- Be concise\n- Flag urgent items immediately\n","MEMORY.md":"# Memory\n\n## Active Projects\n- [Project 1]: [Status]\n\n## Upcoming Deadlines\n- [Date]: [Task]\n","USER.md":"# User Profile\n\n## Name\n[Your name]\n\n## Schedule\n- Work hours: [e.g., 8am-6pm]\n","AGENTS.md":"# Workflows\n\n## Morning Briefing\n1. Check calendar\n2. Review pending tasks\n3. Summarize top 3 priorities\n"}},
+dev:{name:"Dev Agent",emoji:"\u{1F4BB}",files:{"SOUL.md":"# Soul - Dev Agent\n\nYou are a senior software engineer.\n\n## Code Review Principles\n- Correctness first, then performance, then style\n- Always explain *why*, not just *what*\n\n## Git Conventions\n- Conventional commits: feat:, fix:, refactor:, docs:\n","MEMORY.md":"# Memory - Dev Context\n\n## Tech Stack\n- Language: [e.g., TypeScript]\n- Framework: [e.g., Next.js]\n\n## Known Tech Debt\n- [Item]: [Priority]\n","USER.md":"# Developer Profile\n\n## Name\n[Your name]\n\n## Expertise\n- Strong: [languages]\n- Learning: [new tech]\n","AGENTS.md":"# Dev Agents\n\n## Code Review Agent\n- Reviews PRs against coding standards\n\n## Testing Agent\n- Suggests test cases for new features\n"}},
+sales:{name:"Sales & Outreach",emoji:"\u{1F4C8}",files:{"SOUL.md":"# Soul - Sales Agent\n\nYou are a strategic sales advisor.\n\n## Outreach Principles\n- Lead with value, not features\n- Personalize every touchpoint\n- 3-touch minimum before moving on\n","MEMORY.md":"# Pipeline\n\n## Active Prospects\n| Name | Company | Stage | Next Action |\n|------|---------|-------|-------------|\n| [Name] | [Co] | [Stage] | [Action] |\n","USER.md":"# Sales Profile\n\n## Name\n[Your name]\n\n## Company\n[Company name]\n","AGENTS.md":"# Sales Workflows\n\n## Prospecting\n1. Research target company\n2. Identify decision maker\n3. Draft outreach sequence\n"}},
+content:{name:"Content Creator",emoji:"\u{270D}\u{FE0F}",files:{"SOUL.md":"# Soul - Content Agent\n\nYou are a versatile content creator.\n\n## Voice & Tone\n- Conversational but authoritative\n- Use stories and examples\n\n## Platform Guidelines\n### Twitter/X\n- Hook in first line, max 280 chars\n### Blog\n- SEO-optimized, 800-1500 words\n","MEMORY.md":"# Content Calendar\n\n## This Week\n| Day | Platform | Topic | Status |\n|-----|----------|-------|--------|\n| Mon | Blog | [Topic] | [Status] |\n","USER.md":"# Creator Profile\n\n## Name\n[Your name]\n\n## Niche\n[Your niche]\n","AGENTS.md":"# Content Workflows\n\n## Blog Post\n1. Research topic\n2. Create outline\n3. Write draft\n4. Edit and publish\n"}}
+};
+
+class GH{
+constructor(t){this.t=t;this.h={"Authorization":"Bearer "+t,"Accept":"application/vnd.github+json"};}
+async req(u,o={}){const r=await fetch(u,{...o,headers:{...this.h,...(o.headers||{})}});if(!r.ok)throw new Error("GitHub "+r.status+": "+(await r.text()));if(r.status===204)return{};return r.json();}
+async del(u){await fetch(u,{method:"DELETE",headers:this.h});}
+getUser(){return this.req("https://api.github.com/user");}
+async getAgentRepos(){const r=await this.req("https://api.github.com/user/repos?per_page=100&sort=updated");return r.filter(x=>x.topics&&x.topics.includes(TOPIC));}
+getAllRepos(){return this.req("https://api.github.com/user/repos?per_page=100&sort=updated");}
+async createRepo(name,priv,tpl){
+const repo=await this.req("https://api.github.com/user/repos",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name,private:priv,auto_init:true,description:"ClawSync agent repo"})});
+await this.req("https://api.github.com/repos/"+repo.full_name+"/topics",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({names:[TOPIC]})});
+if(tpl&&TEMPLATES[tpl])for(const[fn,c]of Object.entries(TEMPLATES[tpl].files))await this.putFile(repo.full_name,fn,c,"Add "+fn);
+return repo;}
+deleteRepo(fn){return this.del("https://api.github.com/repos/"+fn);}
+async importRepo(fn){
+const repo=await this.req("https://api.github.com/repos/"+fn);const t=repo.topics||[];
+if(!t.includes(TOPIC)){t.push(TOPIC);await this.req("https://api.github.com/repos/"+fn+"/topics",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({names:t})});}
+return repo;}
+async getMdFiles(fn){
+try{const repo=await this.req("https://api.github.com/repos/"+fn);const b=repo.default_branch||"main";
+const tree=await this.req("https://api.github.com/repos/"+fn+"/git/trees/"+b+"?recursive=1");
+return(tree.tree||[]).filter(i=>i.type==="blob"&&/\.(md|mdx|txt|markdown)$/.test(i.path)).map(i=>({name:i.path.split("/").pop(),path:i.path,type:"file",size:i.size||0,sha:i.sha}));}catch(e){return[];}}
+async listFiles(fn){try{const d=await this.req("https://api.github.com/repos/"+fn+"/contents");return Array.isArray(d)?d:[d];}catch(e){return[];}}
+getFile(fn,p){return this.req("https://api.github.com/repos/"+fn+"/contents/"+p);}
+getFileOnBranch(fn,p,br){return this.req("https://api.github.com/repos/"+fn+"/contents/"+p+"?ref="+br);}
+putFile(fn,p,content,msg,sha,br){const body={message:msg||"Update "+p,content:btoa(unescape(encodeURIComponent(content)))};if(sha)body.sha=sha;if(br)body.branch=br;return this.req("https://api.github.com/repos/"+fn+"/contents/"+p,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});}
+getCommits(fn,br){return this.req("https://api.github.com/repos/"+fn+"/commits?per_page=30"+(br?"&sha="+br:""));}
+listBranches(fn){return this.req("https://api.github.com/repos/"+fn+"/branches?per_page=50");}
+async createBranch(fn,name,from){const bs=await this.listBranches(fn);const src=bs.find(b=>b.name===from);if(!src)throw new Error("Source branch not found");return this.req("https://api.github.com/repos/"+fn+"/git/refs",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ref:"refs/heads/"+name,sha:src.commit.sha})});}
+compareBranches(fn,base,head){return this.req("https://api.github.com/repos/"+fn+"/compare/"+base+"..."+head);}
+mergeBranch(fn,head,base,msg){return this.req("https://api.github.com/repos/"+fn+"/merges",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({base,head,commit_message:msg||"Merge "+head+" into "+base})});}
+deleteBranch(fn,name){return this.del("https://api.github.com/repos/"+fn+"/git/refs/heads/"+name);}
+async createSyncTest(fn){const id=Math.random().toString(36).slice(2,10);await this.putFile(fn,".clawsync-test","sync-test-"+id+"\nCreated: "+new Date().toISOString(),"ClawSync sync test");return id;}
+async deleteSyncTest(fn){try{const f=await this.getFile(fn,".clawsync-test");await this.req("https://api.github.com/repos/"+fn+"/contents/.clawsync-test",{method:"DELETE",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:"Remove sync test",sha:f.sha})});}catch(e){}}
+}
+
+function md2html(md){if(!md)return"";return md.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/^#### (.+)$/gm,'<h4>$1</h4>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>').replace(/^> (.+)$/gm,'<blockquote>$1</blockquote>').replace(/^---$/gm,'<hr>').replace(/^\|.+\|$/gm,function(row){var cells=row.split('|').filter(function(c){return c.trim()});if(cells.every(function(c){return/^[\s\-:]+$/.test(c)}))return'';return'<tr>'+cells.map(function(c){return'<td style="border:1px solid var(--border);padding:6px 10px">'+c.trim()+'</td>'}).join('')+'</tr>';}).replace(/(<tr>.*<\/tr>\n?)+/g,'<table style="border-collapse:collapse;margin:8px 0;width:100%">$&</table>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/^\d+\. (.+)$/gm,'<li>$1</li>').replace(/^(?!<[hluobptrd]|<li|<code|<pre|<hr|<blockquote|<table|<tr)(.+)$/gm,'<p>$1</p>').replace(/(<li>.*?<\/li>\n?)+/g,'<ul>$&</ul>');}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function fmtDate(d){return new Date(d).toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"});}
+function fmtTime(d){return new Date(d).toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});}
+function copyText(t){navigator.clipboard.writeText(t).catch(function(){});}
+
+var S={screen:"login",token:localStorage.getItem(SK)||"",user:JSON.parse(localStorage.getItem(UK)||"null"),api:null,repos:[],allRepos:[],repo:null,files:[],mdFiles:[],selFile:null,fileContent:"",fileSha:"",editContent:"",saving:false,saved:false,loading:false,error:"",tab:"edit",showNew:false,showImport:false,showDelete:null,showSetup:null,importSearch:"",newAgent:{name:"",template:"default",private:true},creating:false,wizardStep:0,wizardPlatform:"",showTimeline:false,commits:[],commitsLoading:false,showSync:false,syncTestId:null,syncTesting:false,advanced:false,branches:[],curBranch:"main",defBranch:"main",showBranchMenu:false,showNewBranch:false,newBranchName:"",creatingBranch:false,showDiff:false,diffData:null,diffLoading:false,merging:false,mergeResult:null,commitMsg:"",showNewFile:false,creatingFile:false,newFileName:""};
+function set(u){Object.assign(S,u);render();}
+
+async function init(){if(S.token){S.api=new GH(S.token);try{var u=await S.api.getUser();S.user=u;localStorage.setItem(UK,JSON.stringify(u));set({screen:"dashboard",loading:true});await loadRepos();}catch(e){localStorage.removeItem(SK);localStorage.removeItem(UK);set({screen:"login",token:"",user:null,error:"Invalid token. Please check and try again."});}}else set({screen:"login"});}
+async function loadRepos(){try{var r=await S.api.getAgentRepos();set({repos:r,loading:false});}catch(e){set({loading:false,error:e.message});}}
+async function openRepo(repo){set({screen:"editor",repo:repo,loading:true,files:[],mdFiles:[],selFile:null,fileContent:"",editContent:"",tab:"edit",showTimeline:false,showSync:false,showDiff:false,diffData:null,advanced:false,curBranch:"main",defBranch:"main"});try{var info=await S.api.req("https://api.github.com/repos/"+repo.full_name);var defB=info.default_branch||"main";var res=await Promise.all([S.api.listFiles(repo.full_name),S.api.getMdFiles(repo.full_name)]);var root=res[0],md=res[1];set({files:root,mdFiles:md||[],loading:false,defBranch:defB,curBranch:defB});var rootPaths=new Set(root.filter(function(f){return f.type==="file"}).map(function(f){return f.path}));var nested=(md||[]).filter(function(f){return!rootPaths.has(f.path)});var combined=root.filter(function(f){return f.type==="file"}).concat(nested);var first=combined.find(function(f){return f.name.endsWith(".md")});if(first)await selectFile(first.path);}catch(e){set({loading:false,error:e.message});}}
+async function selectFile(path){try{var f=S.advanced&&S.curBranch!==S.defBranch?await S.api.getFileOnBranch(S.repo.full_name,path,S.curBranch):await S.api.getFile(S.repo.full_name,path);var c=decodeURIComponent(escape(atob(f.content.replace(/\n/g,""))));set({selFile:{path:path,name:path.split("/").pop()},fileContent:c,editContent:c,fileSha:f.sha,saved:false,showTimeline:false,showSync:false,showDiff:false});}catch(e){set({error:e.message});}}
+async function saveFile(){if(!S.selFile||S.saving)return;set({saving:true});try{var msg=S.advanced&&S.curBranch!==S.defBranch?"Update "+S.selFile.name+" on "+S.curBranch:"Update "+S.selFile.name;var br=S.advanced&&S.curBranch!==S.defBranch?S.curBranch:undefined;var r=await S.api.putFile(S.repo.full_name,S.selFile.path,S.editContent,msg,S.fileSha,br);set({saving:false,saved:true,fileSha:r.content.sha,fileContent:S.editContent});setTimeout(function(){set({saved:false})},2000);}catch(e){set({saving:false,error:e.message});}}
+async function createAgent(){if(S.creating)return;set({creating:true,error:""});try{var repo=await S.api.createRepo(S.newAgent.name,S.newAgent.private,S.newAgent.template);set({creating:false,showNew:false,showSetup:repo,wizardStep:1,wizardPlatform:"",newAgent:{name:"",template:"default",private:true}});await loadRepos();}catch(e){set({creating:false,error:e.message});}}
+async function deleteRepo(fn){try{await S.api.deleteRepo(fn);set({showDelete:null});await loadRepos();}catch(e){set({error:e.message});}}
+async function importRepoAction(fn){try{var repo=await S.api.importRepo(fn);set({showImport:false,importSearch:""});await loadRepos();await openRepo(repo);}catch(e){set({error:e.message});}}
+async function loadAllRepos(){try{var r=await S.api.getAllRepos();set({allRepos:r});}catch(e){set({error:e.message});}}
+async function loadTimeline(){set({showTimeline:true,showSync:false,showDiff:false,commitsLoading:true});try{var c=await S.api.getCommits(S.repo.full_name,S.advanced?S.curBranch:undefined);set({commits:c,commitsLoading:false});}catch(e){set({commitsLoading:false,error:e.message});}}
+async function runSyncTest(){set({syncTesting:true});try{var id=await S.api.createSyncTest(S.repo.full_name);set({syncTestId:id,syncTesting:false});}catch(e){set({syncTesting:false,error:e.message});}}
+async function cleanSyncTest(){try{await S.api.deleteSyncTest(S.repo.full_name);set({syncTestId:null});}catch(e){}}
+async function loadBranches(){try{var b=await S.api.listBranches(S.repo.full_name);set({branches:b});}catch(e){}}
+async function toggleAdvanced(){var next=!S.advanced;set({advanced:next,showDiff:false,diffData:null});if(next)await loadBranches();else set({curBranch:S.defBranch});}
+function switchBranch(name){set({curBranch:name,showBranchMenu:false,showDiff:false,diffData:null});if(S.selFile)selectFile(S.selFile.path);}
+async function createBranchAction(){if(!S.newBranchName.trim())return;set({creatingBranch:true});try{await S.api.createBranch(S.repo.full_name,S.newBranchName.trim(),S.curBranch);await loadBranches();set({curBranch:S.newBranchName.trim(),showNewBranch:false,newBranchName:"",creatingBranch:false});}catch(e){set({creatingBranch:false,error:e.message});}}
+async function loadDiff(){if(S.curBranch===S.defBranch)return;set({diffLoading:true,showDiff:true,showTimeline:false,showSync:false});try{var d=await S.api.compareBranches(S.repo.full_name,S.defBranch,S.curBranch);set({diffData:d,diffLoading:false});}catch(e){set({diffData:null,diffLoading:false});}}
+async function mergeBranchAction(){set({merging:true,mergeResult:null});try{await S.api.mergeBranch(S.repo.full_name,S.curBranch,S.defBranch,S.commitMsg||"Merge "+S.curBranch+" into "+S.defBranch);try{await S.api.deleteBranch(S.repo.full_name,S.curBranch);}catch(e){}await loadBranches();set({merging:false,mergeResult:"Merged successfully!",curBranch:S.defBranch,showDiff:false,diffData:null,commitMsg:""});setTimeout(function(){set({mergeResult:null})},3000);await openRepo(S.repo);}catch(e){var m=e.message||"";set({merging:false,mergeResult:m.includes("409")?"Merge conflict - resolve on GitHub":"Merge failed: "+m});}}
+async function createFileAction(name,content){set({creatingFile:true});try{var br=S.advanced&&S.curBranch!==S.defBranch?S.curBranch:undefined;await S.api.putFile(S.repo.full_name,name,content||"# "+name.replace('.md','')+ "\n\nAdd your content here.\n","Create "+name,undefined,br);var res=await Promise.all([S.api.listFiles(S.repo.full_name),S.api.getMdFiles(S.repo.full_name)]);set({files:res[0],mdFiles:res[1]||[],showNewFile:false,creatingFile:false,newFileName:""});await selectFile(name);}catch(e){set({creatingFile:false,error:e.message});}}
+function login(t){localStorage.setItem(SK,t);S.token=t;S.api=new GH(t);init();}
+function logout(){localStorage.removeItem(SK);localStorage.removeItem(UK);set({screen:"login",token:"",user:null,repos:[],repo:null,api:null,error:""});}
+
+function render(){var a=document.getElementById("app");if(S.screen==="login")a.innerHTML=rLogin();else if(S.screen==="dashboard")a.innerHTML=rDash();else if(S.screen==="editor")a.innerHTML=rEditor();bindEvents();}
+
+function rLogin(){return '<div class="login-screen"><div class="login-box"><h1>Claw<span>Sync</span></h1><p>Local Edition \u2014 runs entirely in your browser, no server needed</p>'+(S.error?'<div class="error-msg">'+esc(S.error)+'</div>':'')+'<label>GitHub Personal Access Token</label><input type="password" id="pat" placeholder="ghp_xxxxxxxxxxxx"/><div class="help-text">Generate at <a href="https://github.com/settings/tokens/new?scopes=repo,delete_repo&description=ClawSync+Local" target="_blank">github.com/settings/tokens</a><br>Scopes needed: <code>repo</code>, <code>delete_repo</code>. Your token stays in your browser only.</div><button class="btn btn-primary btn-full" id="login-btn">Connect to GitHub</button></div></div>';}
+
+function rDash(){
+var cards=S.repos.map(function(r){return '<div class="repo-card" data-repo="'+esc(r.full_name)+'"><h4>'+esc(r.name)+'</h4><p>'+esc(r.description||"ClawSync agent")+'</p><div style="display:flex;gap:6px;margin-top:8px;align-items:center"><span class="badge">'+(r.private?"\u{1F512} Private":"\u{1F310} Public")+'</span><span style="flex:1"></span><button class="btn btn-ghost btn-sm del-repo" data-repo="'+esc(r.full_name)+'" style="color:var(--danger);border-color:var(--danger);padding:4px 8px">\u{1F5D1}</button></div></div>';}).join("");
+return '<div class="app-col"><div class="topbar"><h3>Claw<span style="color:var(--accent)">Sync</span> <span style="color:var(--muted);font-size:12px;font-weight:400">Local Edition</span></h3><div class="actions">'+(S.user?'<span style="font-size:13px;color:var(--muted)">'+esc(S.user.login)+'</span><img src="'+esc(S.user.avatar_url)+'" style="width:28px;height:28px;border-radius:50%">':'')+'<button class="btn btn-ghost btn-sm" id="logout-btn">Logout</button></div></div><div class="dashboard"><h2>Your Agents</h2><p class="subtitle">Manage your AI agent knowledge repos</p><div style="display:flex;gap:8px;margin-bottom:24px"><button class="btn btn-primary btn-sm" id="new-btn">+ New Agent</button><button class="btn btn-ghost btn-sm" id="import-btn">\u{1F4C2} Open Existing Repo</button></div>'+(S.loading?'<div class="loading-screen"><div class="spinner"></div> Loading...</div>':'<div class="repo-grid">'+cards+'<div class="repo-card new-repo-card" id="new-card"><div style="font-size:32px;opacity:0.3">+</div><div>Create New Agent</div></div></div>')+(!S.repos.length&&!S.loading?'<p style="color:var(--muted);margin-top:16px">No agents yet. Create one or import an existing repo!</p>':'')+'</div></div>'+(S.showNew?rNewModal():'')+(S.showImport?rImportModal():'')+(S.showDelete?rDeleteModal():'')+(S.showSetup?rSetupWizard():'');}
+
+function rNewModal(){
+var tc=Object.entries(TEMPLATES).map(function(e){var k=e[0],t=e[1];return '<div class="template-card '+(S.newAgent.template===k?'selected':'')+'" data-tpl="'+k+'"><div class="emoji">'+t.emoji+'</div><div class="name">'+t.name+'</div></div>';}).join("");
+return '<div class="modal-overlay" id="overlay"><div class="modal"><h3>Create New Agent</h3>'+(S.error?'<div class="error-msg">'+esc(S.error)+'</div>':'')+'<label>Agent Name</label><input type="text" id="agent-name" placeholder="my-agent" value="'+esc(S.newAgent.name)+'"/><label>Template</label><div class="template-grid">'+tc+'</div><label>Visibility</label><select id="agent-vis"><option value="private" '+(S.newAgent.private?'selected':'')+'>Private</option><option value="public" '+(!S.newAgent.private?'selected':'')+'>Public</option></select><div class="btn-row"><button class="btn btn-ghost btn-sm" id="cancel-modal">Cancel</button><button class="btn btn-primary btn-sm" id="create-btn" '+(S.creating?'disabled':'')+'>'+(S.creating?'Creating...':'Create Agent')+'</button></div></div></div>';}
+
+function rImportModal(){
+var filtered=S.allRepos.filter(function(r){if(S.importSearch&&!r.full_name.toLowerCase().includes(S.importSearch.toLowerCase()))return false;return!r.topics||!r.topics.includes(TOPIC);});
+return '<div class="modal-overlay" id="overlay"><div class="modal"><h3>Open Existing Repo</h3><p style="color:var(--muted);font-size:13px;margin-bottom:12px">All markdown files will be discovered automatically.</p><input type="text" id="import-search" class="search-input" placeholder="Search repos..." value="'+esc(S.importSearch)+'"/><div class="repo-list">'+(!S.allRepos.length?'<div class="loading-screen" style="padding:20px"><div class="spinner"></div> Loading...</div>':'')+filtered.map(function(r){return '<div class="repo-list-item" data-import="'+esc(r.full_name)+'"><div><div style="font-size:13px;font-weight:500">'+esc(r.full_name)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(r.description||"")+'</div></div><button class="btn btn-primary btn-sm">Open</button></div>';}).join("")+(!filtered.length&&S.allRepos.length?'<div style="padding:20px;text-align:center;color:var(--muted)">No matching repos</div>':'')+'</div><div class="btn-row"><button class="btn btn-ghost btn-sm" id="cancel-modal">Cancel</button></div></div></div>';}
+
+function rDeleteModal(){return '<div class="modal-overlay" id="overlay"><div class="modal" style="max-width:400px;text-align:center"><h3>\u26A0\uFE0F Delete Repository?</h3><p style="color:var(--muted);font-size:13px;margin:12px 0">This will permanently delete <strong>'+esc(S.showDelete)+'</strong> from GitHub. This cannot be undone.</p><div class="btn-row" style="justify-content:center"><button class="btn btn-ghost btn-sm" id="cancel-modal">Cancel</button><button class="btn btn-danger btn-sm" id="confirm-del">Delete Forever</button></div></div></div>';}
+
+function rSetupWizard(){
+var repo=S.showSetup;var steps=[1,2,3,4];
+var stepBar='<div class="wizard-steps">'+steps.map(function(i){return '<div class="wizard-step '+(S.wizardStep>i?'done':'')+(S.wizardStep===i?' current':'')+'"></div>';}).join("")+'</div>';
+var c="";
+if(S.wizardStep===1){
+c='<h3>\u{1F389} Agent Created!</h3>'+stepBar+'<p style="color:var(--muted);margin-bottom:16px">Your repo <strong>'+esc(repo.full_name)+'</strong> is ready on GitHub.</p><a href="https://github.com/'+esc(repo.full_name)+'" target="_blank" class="btn btn-ghost btn-sm btn-full" style="margin-bottom:16px;text-decoration:none">View on GitHub \u2197</a><p style="color:var(--muted);font-size:13px;margin-bottom:12px">Choose your platform to set up file sync:</p><div class="platform-grid"><div class="platform-card '+(S.wizardPlatform==="vps"?"selected":"")+'" data-platform="vps"><div class="p-emoji">\u{1F5A5}\uFE0F</div><div class="p-name">VPS / Server</div><div class="p-desc">DigitalOcean, AWS, etc.</div></div><div class="platform-card '+(S.wizardPlatform==="mac"?"selected":"")+'" data-platform="mac"><div class="p-emoji">\u{1F34E}</div><div class="p-name">Mac / Laptop</div><div class="p-desc">Two-way sync</div></div><div class="platform-card '+(S.wizardPlatform==="local"?"selected":"")+'" data-platform="local"><div class="p-emoji">\u{1F4C1}</div><div class="p-name">Local Folder</div><div class="p-desc">Pick a folder on disk</div></div></div><div class="btn-row"><button class="btn btn-ghost btn-sm" id="skip-setup">Skip \u2014 set up later</button>'+(S.wizardPlatform?'<button class="btn btn-primary btn-sm" id="next-wizard">Next \u2192</button>':'')+'</div>';
+}else if(S.wizardStep===2){
+c='<h3>\u{1F511} Add SSH Key</h3>'+stepBar+'<p style="color:var(--muted);font-size:13px;margin-bottom:16px">Your '+(S.wizardPlatform==="vps"?"server":"machine")+' needs an SSH key to access GitHub.</p><div class="sync-step"><div class="step-num">1</div><div><div class="step-title">Generate SSH key</div><div class="code-block">ssh-keygen -t ed25519 -C "clawsync" -f ~/.ssh/id_ed25519 -N ""<button class="copy-btn" data-copy=\'ssh-keygen -t ed25519 -C "clawsync" -f ~/.ssh/id_ed25519 -N ""\'>Copy</button></div></div></div><div class="sync-step"><div class="step-num">2</div><div><div class="step-title">Copy your public key</div><div class="code-block">cat ~/.ssh/id_ed25519.pub<button class="copy-btn" data-copy="cat ~/.ssh/id_ed25519.pub">Copy</button></div></div></div><div class="sync-step"><div class="step-num">3</div><div><div class="step-title">Add to GitHub</div><div class="step-desc">Click below to open GitHub SSH key settings, then click "New SSH key" and paste your public key.</div><a href="https://github.com/settings/keys" target="_blank" class="btn btn-ghost btn-sm" style="margin-top:8px;text-decoration:none">Open GitHub SSH Settings \u2197</a></div></div><div class="btn-row"><button class="btn btn-ghost btn-sm" id="prev-wizard">\u2190 Back</button><button class="btn btn-primary btn-sm" id="next-wizard">Next \u2192</button></div>';
+}else if(S.wizardStep===3){
+var fn=repo.full_name;
+var cloneCmd="git clone git@github.com:"+fn+".git ~/.openclaw/workspace";
+var localCloneCmd="git clone git@github.com:"+fn+".git ~/ClawSync/"+repo.name;
+var syncVps='(crontab -l 2>/dev/null; echo "* * * * * cd ~/.openclaw/workspace && git pull --quiet") | crontab -';
+var syncMac="#!/bin/bash\n# Save as ~/clawsync-sync.sh && chmod +x ~/clawsync-sync.sh\nwhile true; do\n  cd ~/.openclaw/workspace\n  git pull --quiet\n  git add -A && git diff --cached --quiet || git commit -m \"Auto-sync\" && git push --quiet\n  sleep 60\ndone";
+var syncLocal="#!/bin/bash\n# Save as ~/clawsync-sync.sh && chmod +x ~/clawsync-sync.sh\nwhile true; do\n  cd ~/ClawSync/"+repo.name+"\n  git pull --quiet\n  git add -A && git diff --cached --quiet || git commit -m \"Auto-sync\" && git push --quiet\n  sleep 60\ndone";
+var curClone=S.wizardPlatform==="local"?localCloneCmd:cloneCmd;
+var curSync=S.wizardPlatform==="vps"?syncVps:S.wizardPlatform==="local"?syncLocal:syncMac;
+var syncDesc=S.wizardPlatform==="vps"?"Cron job pulls every minute:":"Two-way sync script (pulls + pushes):";
+c='<h3>\u{1F4E5} Clone & Sync</h3>'+stepBar+'<div class="sync-step"><div class="step-num">1</div><div><div class="step-title">Clone the repo</div><div class="code-block">'+esc(curClone)+'<button class="copy-btn" data-copy="'+esc(curClone)+'">Copy</button></div></div></div><div class="sync-step"><div class="step-num">2</div><div><div class="step-title">Enable auto-sync</div><div class="step-desc">'+syncDesc+'</div><div class="code-block" style="white-space:pre-wrap">'+esc(curSync)+'<button class="copy-btn" data-copy="'+esc(curSync)+'">Copy</button></div></div></div>'+(S.wizardPlatform==="local"?'<div class="sync-step"><div class="step-num">3</div><div><div class="step-title">Run the sync script</div><div class="step-desc">Start the script in a terminal or add it as a login item to run automatically.</div><div class="code-block">nohup ~/clawsync-sync.sh &amp;<button class="copy-btn" data-copy="nohup ~/clawsync-sync.sh &">Copy</button></div></div></div>':'')+'<div class="btn-row"><button class="btn btn-ghost btn-sm" id="prev-wizard">\u2190 Back</button><button class="btn btn-primary btn-sm" id="next-wizard">Done \u2713</button></div>';
+}else if(S.wizardStep===4){
+c='<h3>\u2705 All Set!</h3>'+stepBar+'<p style="color:var(--muted);margin-bottom:16px">Your agent is connected. Edit files in ClawSync and they sync to your '+(S.wizardPlatform==="vps"?"server":S.wizardPlatform==="mac"?"Mac":"local folder")+' automatically.</p><p style="color:var(--muted);font-size:13px;margin-bottom:16px">Use <strong>Sync Check</strong> in the editor to verify the connection is working.</p><div class="btn-row"><button class="btn btn-primary btn-sm" id="finish-wizard">Open Agent Editor</button></div>';
+}
+return '<div class="modal-overlay" id="overlay"><div class="modal">'+c+'</div></div>';}
+
+function rEditor(){
+var rootFiles=S.files.filter(function(f){return f.type==="file"});
+var rootDirs=S.files.filter(function(f){return f.type==="dir"});
+var rootPaths=new Set(rootFiles.map(function(f){return f.path}));
+var nested=S.mdFiles.filter(function(f){return!rootPaths.has(f.path)});
+var groups={};nested.forEach(function(f){var d=f.path.includes("/")?f.path.substring(0,f.path.lastIndexOf("/")):"";if(!groups[d])groups[d]=[];groups[d].push(f);});
+var rootItems=rootFiles.map(function(f){var active=S.selFile&&S.selFile.path===f.path;return '<button class="nav-item '+(active?'active':'')+'" data-file="'+esc(f.path)+'"><span class="icon">'+(f.name.endsWith('.md')?'\u{1F4C4}':'\u{1F4CE}')+'</span><div><span>'+esc(f.name)+'</span></div></button>';}).join("");
+var nestedHtml="";var sortedDirs=Object.entries(groups).sort(function(a,b){return a[0].localeCompare(b[0])});
+if(sortedDirs.length){nestedHtml+='<div style="margin-top:12px;border-top:1px solid var(--border);padding-top:8px"><h3 style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding:0 8px;margin-bottom:4px">All Markdown Files</h3></div>';for(var i=0;i<sortedDirs.length;i++){var dir=sortedDirs[i][0],dfs=sortedDirs[i][1];if(dir)nestedHtml+='<div class="folder-heading">\u{1F4C1} '+esc(dir)+'/</div>';for(var j=0;j<dfs.length;j++){var f=dfs[j];var active=S.selFile&&S.selFile.path===f.path;nestedHtml+='<button class="nav-item '+(active?'active':'')+'" data-file="'+esc(f.path)+'" style="'+(dir?'padding-left:28px':'')+'"><span class="icon">\u{1F4C4}</span><div><span>'+esc(f.name)+'</span><div class="path-label">'+esc(f.path)+'</div></div></button>';}}}
+var dirHtml=rootDirs.map(function(d){return '<div class="nav-item" style="opacity:0.5;cursor:default"><span class="icon">\u{1F4C1}</span><span>'+esc(d.name)+'/</span></div>';}).join("");
+var hasChanges=S.editContent!==S.fileContent;
+var mainContent="";
+if(S.showTimeline)mainContent=rTimeline();
+else if(S.showSync)mainContent=rSyncPanel();
+else if(S.showDiff&&S.advanced)mainContent=rDiffView();
+else if(S.selFile){
+mainContent='<div class="topbar"><h3>'+esc(S.selFile.name)+(hasChanges?' <span style="color:var(--muted);font-size:11px">(unsaved)</span>':'')+(S.advanced&&S.curBranch!==S.defBranch?' <span style="font-size:11px;color:var(--purple)">on '+esc(S.curBranch)+'</span>':'')+'</h3><div class="actions">'+(S.saved?'<span style="color:var(--accent);font-size:12px">\u2713 Saved</span>':'')+'<button class="btn btn-primary btn-sm" id="save-btn" '+(S.saving||!hasChanges?'disabled':'')+'>'+(S.saving?'Saving...':'Save')+'</button></div></div><div class="tabs"><button class="tab '+(S.tab==='edit'?'active':'')+'" data-tab="edit">Edit</button><button class="tab '+(S.tab==='preview'?'active':'')+'" data-tab="preview">Preview</button></div><div class="editor-area">'+(S.tab==="edit"?'<textarea id="editor" spellcheck="false">'+esc(S.editContent)+'</textarea>':'<div class="preview">'+md2html(S.editContent)+'</div>')+'</div>';
+}else mainContent='<div class="empty-state"><div class="big-icon">\u{1F4DD}</div><div>Select a file to edit</div></div>';
+var branchBar="";
+if(S.advanced){
+branchBar='<div class="branch-bar"><div class="branch-picker"><button class="branch-btn" id="branch-toggle">\u{1F33F} '+esc(S.curBranch)+' \u25BE</button>'+(S.showBranchMenu?'<div class="branch-dropdown">'+S.branches.map(function(b){return '<button class="'+(b.name===S.curBranch?'active':'')+'" data-branch="'+esc(b.name)+'">\u{1F33F} '+esc(b.name)+(b.name===S.defBranch?' <span style="font-size:10px;opacity:0.5">(default)</span>':'')+'</button>';}).join("")+'<div class="divider"></div><button id="new-branch-btn" style="color:var(--accent)">+ Create new branch</button></div>':'')+'</div>'+(S.curBranch!==S.defBranch?'<span style="font-size:12px;color:var(--muted)">branched from '+esc(S.defBranch)+'</span><button class="btn btn-blue btn-sm" id="view-changes">'+(S.diffLoading?'Loading...':'\u{1F4CA} View Changes')+'</button><button class="btn btn-purple btn-sm" id="merge-btn">\u{1F500} Merge to '+esc(S.defBranch)+'</button>':'')+(S.mergeResult?'<span style="font-size:12px;color:'+(S.mergeResult.includes('success')?'var(--accent)':'var(--danger)')+'">'+esc(S.mergeResult)+'</span>':'')+'</div>';}
+return '<div class="app"><div class="sidebar"><div class="sidebar-header"><h2 id="back-dash">\u2190 <span>Claw</span>Sync</h2><div style="font-size:12px;color:var(--muted);margin-top:8px">\u{1F4E6} '+esc(S.repo?S.repo.full_name:'')+'</div></div><div class="sidebar-nav"><div class="nav-section"><h3>Files</h3>'+(S.loading?'<div style="padding:12px;text-align:center"><div class="spinner"></div></div>':'')+rootItems+nestedHtml+dirHtml+'<button class="nav-item" id="add-file-btn" style="color:var(--accent);margin-top:8px"><span class="icon">+</span><span>Add File</span></button></div></div><div class="sidebar-footer"><button class="btn btn-ghost btn-sm btn-full" id="sync-btn">\u{1F4E1} Sync Check</button><button class="btn btn-ghost btn-sm btn-full" id="timeline-btn">\u{1F550} Timeline</button><button class="btn '+(S.advanced?'btn-purple':'btn-ghost')+' btn-sm btn-full" id="advanced-btn">'+(S.advanced?'\u{1F7E3} Advanced ON':'\u2699\uFE0F Advanced')+'</button><a href="https://github.com/'+esc(S.repo?S.repo.full_name:'')+'" target="_blank" class="btn btn-ghost btn-sm btn-full" style="text-decoration:none">View on GitHub \u2197</a></div></div><div class="main">'+branchBar+mainContent+'</div></div>'+(S.showNewBranch?rNewBranchModal():'')+(S.showNewFile?rNewFileModal():'');}
+
+function rTimeline(){
+if(S.commitsLoading)return '<div class="loading-screen"><div class="spinner"></div> Loading timeline...</div>';
+if(!S.commits.length)return '<div class="topbar"><h3>\u{1F550} Timeline \u2014 '+esc(S.repo.name)+'</h3><div class="actions"><button class="btn btn-ghost btn-sm" id="close-panel">\u2190 Back</button></div></div><div class="empty-state"><div class="big-icon">\u{1F550}</div><div>No commits yet</div></div>';
+var days={};S.commits.forEach(function(c){var d=fmtDate(c.commit.author.date);if(!days[d])days[d]=[];days[d].push(c);});
+var h='<div class="topbar"><h3>\u{1F550} Timeline \u2014 '+esc(S.repo.name)+(S.advanced?' <span style="font-size:11px;color:var(--purple)">('+esc(S.curBranch)+')</span>':'')+'</h3><div class="actions"><button class="btn btn-ghost btn-sm" id="close-panel">\u2190 Back to Editor</button></div></div><div class="timeline-view">';
+for(var day in days){h+='<div class="timeline-day">'+esc(day)+'</div>';days[day].forEach(function(c){h+='<div class="timeline-item"><div class="timeline-dot"></div><div class="commit-msg">'+esc(c.commit.message.split("\n")[0])+'</div><div class="commit-meta">'+esc(c.commit.author.name)+' at '+fmtTime(c.commit.author.date)+' \u00B7 <span class="commit-sha">'+c.sha.slice(0,7)+'</span></div></div>';});}
+return h+'</div>';}
+
+function rSyncPanel(){
+var fn=S.repo.full_name;
+return '<div class="topbar"><h3>\u{1F4E1} Sync Check \u2014 '+esc(S.repo.name)+'</h3><div class="actions"><button class="btn btn-ghost btn-sm" id="close-panel">\u2190 Back to Editor</button></div></div><div style="padding:24px;overflow-y:auto;flex:1"><div class="sync-panel"><h4>\u{1F5A5}\uFE0F VPS / Server Setup</h4><div class="sync-step"><div class="step-num">1</div><div><div class="step-title">Clone the repo on your server</div><div class="code-block">git clone git@github.com:'+esc(fn)+'.git ~/.openclaw/workspace<button class="copy-btn" data-copy="git clone git@github.com:'+esc(fn)+'.git ~/.openclaw/workspace">Copy</button></div></div></div><div class="sync-step"><div class="step-num">2</div><div><div class="step-title">Enable auto-sync (cron pulls every minute)</div><div class="code-block">(crontab -l 2&gt;/dev/null; echo &quot;* * * * * cd ~/.openclaw/workspace &amp;&amp; git pull --quiet&quot;) | crontab -<button class="copy-btn" data-copy="(crontab -l 2>/dev/null; echo &quot;* * * * * cd ~/.openclaw/workspace && git pull --quiet&quot;) | crontab -">Copy</button></div></div></div></div><div class="sync-panel"><h4>\u{1F34E} Mac / Local Folder Setup</h4><div class="sync-step"><div class="step-num">1</div><div><div class="step-title">Clone to a local folder</div><div class="code-block">git clone git@github.com:'+esc(fn)+'.git ~/ClawSync/'+esc(S.repo.name)+'<button class="copy-btn" data-copy="git clone git@github.com:'+esc(fn)+'.git ~/ClawSync/'+esc(S.repo.name)+'">Copy</button></div></div></div><div class="sync-step"><div class="step-num">2</div><div><div class="step-title">Run two-way sync script</div><div class="step-desc">This pulls remote changes AND pushes local edits every 60 seconds.</div><div class="code-block" style="white-space:pre-wrap">#!/bin/bash\nwhile true; do\n  cd ~/ClawSync/'+esc(S.repo.name)+'\n  git pull --quiet\n  git add -A &amp;&amp; git diff --cached --quiet || git commit -m &quot;Auto-sync&quot; &amp;&amp; git push --quiet\n  sleep 60\ndone<button class="copy-btn" data-copy="#!/bin/bash\nwhile true; do\n  cd ~/ClawSync/'+esc(S.repo.name)+'\n  git pull --quiet\n  git add -A && git diff --cached --quiet || git commit -m &quot;Auto-sync&quot; && git push --quiet\n  sleep 60\ndone">Copy</button></div></div></div></div><div class="sync-panel"><h4>\u{1F9EA} Test Sync Connection</h4><p style="color:var(--muted);font-size:13px;margin-bottom:16px">Send a test file to GitHub, then verify it arrives on your server/Mac.</p>'+(!S.syncTestId?'<button class="btn btn-primary btn-sm" id="send-test" '+(S.syncTesting?'disabled':'')+'>'+(S.syncTesting?'Sending...':'Send Sync Test')+'</button>':'<div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px"><div style="font-size:13px;font-weight:600;color:var(--accent);margin-bottom:8px">\u2713 Test file sent!</div><p style="font-size:12px;color:var(--muted);margin-bottom:8px">Run this command to verify the file arrived:</p><div class="code-block">cat ~/.openclaw/workspace/.clawsync-test<button class="copy-btn" data-copy="cat ~/.openclaw/workspace/.clawsync-test">Copy</button></div><p style="font-size:12px;color:var(--muted);margin-top:8px">Expected test ID: <code style="color:var(--accent)">'+esc(S.syncTestId)+'</code></p></div><button class="btn btn-ghost btn-sm" id="clean-test">\u{1F9F9} Clean Up Test File</button>')+'</div></div>';}
+
+function rDiffView(){
+if(S.diffLoading)return '<div class="loading-screen"><div class="spinner"></div> Loading changes...</div>';
+if(!S.diffData||!S.diffData.files||!S.diffData.files.length)return '<div class="topbar"><h3>\u{1F4CA} Changes: '+esc(S.curBranch)+' \u2192 '+esc(S.defBranch)+'</h3><div class="actions"><button class="btn btn-ghost btn-sm" id="close-panel">\u2190 Back</button></div></div><div class="empty-state"><div class="big-icon">\u{1F4CA}</div><div>No changes between branches</div></div>';
+var d=S.diffData;
+var h='<div class="topbar"><h3>\u{1F4CA} Changes: '+esc(S.curBranch)+' \u2192 '+esc(S.defBranch)+'</h3><div class="actions"><span style="font-size:12px;color:var(--muted)">'+(d.ahead_by||0)+' commit'+(d.ahead_by!==1?'s':'')+' ahead, '+(d.files?d.files.length:0)+' file'+(d.files&&d.files.length!==1?'s':'')+' changed</span><button class="btn btn-ghost btn-sm" id="close-panel">\u2190 Back</button></div></div>';
+h+='<div class="merge-panel"><h4>\u{1F500} Merge '+esc(S.curBranch)+' into '+esc(S.defBranch)+'</h4><input type="text" id="merge-msg" placeholder="Commit message (optional)" value="'+esc(S.commitMsg)+'"/><button class="btn btn-primary btn-sm" id="do-merge" '+(S.merging?'disabled':'')+'>'+(S.merging?'Merging...':'Merge & Delete Branch')+'</button>'+(S.mergeResult?'<span style="font-size:12px;margin-left:8px;color:'+(S.mergeResult.includes('success')?'var(--accent)':'var(--danger)')+'">'+esc(S.mergeResult)+'</span>':'')+'</div>';
+h+='<div class="diff-container">';
+(d.files||[]).forEach(function(f){h+='<div class="diff-file"><div class="diff-file-header"><span class="diff-file-name">'+esc(f.filename)+'</span><span class="diff-file-stats"><span class="add">+'+f.additions+'</span> <span class="del">-'+f.deletions+'</span></span></div><div class="diff-lines">';if(f.patch)f.patch.split("\n").forEach(function(line){var cls=line.startsWith("+")?'add':line.startsWith("-")?'del':line.startsWith("@@")?'hunk':'';h+='<div class="diff-line '+cls+'">'+esc(line)+'</div>';});h+='</div></div>';});
+return h+'</div>';}
+
+function rNewBranchModal(){return '<div class="modal-overlay" id="overlay"><div class="modal" style="max-width:400px"><h3>\u{1F33F} Create Branch</h3><label>Branch name</label><input type="text" id="branch-name-input" placeholder="feature/my-changes" value="'+esc(S.newBranchName)+'"/><p style="font-size:12px;color:var(--muted);margin-top:8px">Branching from: <strong>'+esc(S.curBranch)+'</strong></p><div class="btn-row"><button class="btn btn-ghost btn-sm" id="cancel-modal">Cancel</button><button class="btn btn-primary btn-sm" id="create-branch" '+(S.creatingBranch?'disabled':'')+'>'+(S.creatingBranch?'Creating...':'Create Branch')+'</button></div></div></div>';}
+
+function rNewFileModal(){
+var stdFiles=["SOUL.md","MEMORY.md","USER.md","AGENTS.md","IDENTITY.md","TOOLS.md","HEARTBEAT.md"];
+var existing=new Set(S.files.map(function(f){return f.name}));
+var avail=stdFiles.filter(function(n){return!existing.has(n)});
+return '<div class="modal-overlay" id="overlay"><div class="modal" style="max-width:420px"><h3>\u{1F4C4} Add File</h3>'+(avail.length?'<p style="color:var(--muted);font-size:13px;margin-bottom:12px">Quick-add a standard knowledge file:</p>'+avail.map(function(n){return '<button class="btn btn-ghost btn-sm btn-full create-std-file" data-filename="'+n+'" style="margin-bottom:6px;justify-content:flex-start">\u{1F4C4} '+n+'</button>';}).join("")+'<hr style="border:none;border-top:1px solid var(--border);margin:16px 0">':'')+'<p style="color:var(--muted);font-size:13px;margin-bottom:8px">Or create a custom file:</p><input type="text" id="custom-filename" placeholder="notes/meeting.md" value="'+esc(S.newFileName)+'"/><div class="btn-row"><button class="btn btn-ghost btn-sm" id="cancel-modal">Cancel</button><button class="btn btn-primary btn-sm" id="create-custom-file">Create</button></div></div></div>';}
+
+function bindEvents(){
+on("login-btn","click",function(){var v=el("pat");if(v&&v.value.trim())login(v.value.trim());});
+var pat=el("pat");if(pat)pat.onkeydown=function(e){if(e.key==="Enter"){var v=el("pat");if(v&&v.value.trim())login(v.value.trim());}};
+on("logout-btn","click",logout);
+on("new-btn","click",function(){set({showNew:true,error:""})});
+on("new-card","click",function(){set({showNew:true,error:""})});
+on("import-btn","click",async function(){set({showImport:true,allRepos:[]});await loadAllRepos();});
+document.querySelectorAll(".repo-card[data-repo]").forEach(function(c){c.onclick=function(e){if(e.target.closest(".del-repo"))return;var r=S.repos.find(function(x){return x.full_name===c.dataset.repo});if(r)openRepo(r);};});
+document.querySelectorAll(".del-repo").forEach(function(b){b.onclick=function(e){e.stopPropagation();set({showDelete:b.dataset.repo});};});
+on("confirm-del","click",function(){deleteRepo(S.showDelete)});
+on("cancel-modal","click",function(){set({showNew:false,showImport:false,showDelete:null,showNewBranch:false,showNewFile:false,newFileName:"",error:""})});
+on("overlay","click",function(e){if(e.target.id==="overlay")set({showNew:false,showImport:false,showDelete:null,showSetup:null,showNewBranch:false,showNewFile:false,newFileName:"",error:""})});
+var an=el("agent-name");if(an)an.oninput=function(e){S.newAgent.name=e.target.value;};
+var av=el("agent-vis");if(av)av.onchange=function(e){S.newAgent.private=e.target.value==="private";};
+document.querySelectorAll("[data-tpl]").forEach(function(c){c.onclick=function(){S.newAgent.template=c.dataset.tpl;render();};});
+on("create-btn","click",createAgent);
+var is=el("import-search");if(is)is.oninput=function(e){set({importSearch:e.target.value})};
+document.querySelectorAll("[data-import]").forEach(function(i){i.onclick=function(){importRepoAction(i.dataset.import)};});
+document.querySelectorAll("[data-platform]").forEach(function(c){c.onclick=function(){set({wizardPlatform:c.dataset.platform})};});
+on("next-wizard","click",function(){if(S.wizardStep<4)set({wizardStep:S.wizardStep+1})});
+on("prev-wizard","click",function(){if(S.wizardStep>1)set({wizardStep:S.wizardStep-1})});
+on("skip-setup","click",function(){var r=S.showSetup;set({showSetup:null});openRepo(r);});
+on("finish-wizard","click",function(){var r=S.showSetup;set({showSetup:null});openRepo(r);});
+on("back-dash","click",async function(){set({screen:"dashboard",repo:null,loading:true});await loadRepos();});
+document.querySelectorAll("[data-file]").forEach(function(b){b.onclick=function(){selectFile(b.dataset.file)};});
+document.querySelectorAll("[data-tab]").forEach(function(t){t.onclick=function(){set({tab:t.dataset.tab})};});
+var editor=el("editor");if(editor){editor.oninput=function(e){S.editContent=e.target.value;};editor.onkeydown=function(e){if((e.ctrlKey||e.metaKey)&&e.key==="s"){e.preventDefault();saveFile();}};}
+on("save-btn","click",saveFile);
+on("close-panel","click",function(){set({showTimeline:false,showSync:false,showDiff:false})});
+on("timeline-btn","click",loadTimeline);
+on("sync-btn","click",function(){set({showSync:true,showTimeline:false,showDiff:false})});
+on("send-test","click",runSyncTest);
+on("clean-test","click",cleanSyncTest);
+on("advanced-btn","click",toggleAdvanced);
+on("branch-toggle","click",function(){set({showBranchMenu:!S.showBranchMenu})});
+document.querySelectorAll("[data-branch]").forEach(function(b){b.onclick=function(){switchBranch(b.dataset.branch)};});
+on("new-branch-btn","click",function(){set({showBranchMenu:false,showNewBranch:true})});
+var bni=el("branch-name-input");if(bni)bni.oninput=function(e){S.newBranchName=e.target.value;};
+on("create-branch","click",createBranchAction);
+on("view-changes","click",loadDiff);
+on("merge-btn","click",function(){if(S.showDiff)mergeBranchAction();else loadDiff();});
+var mm=el("merge-msg");if(mm)mm.oninput=function(e){S.commitMsg=e.target.value;};
+on("do-merge","click",mergeBranchAction);
+on("add-file-btn","click",function(){set({showNewFile:true,newFileName:""})});
+document.querySelectorAll(".create-std-file").forEach(function(b){b.onclick=function(){createFileAction(b.dataset.filename);};});
+var cfn=el("custom-filename");if(cfn)cfn.oninput=function(e){S.newFileName=e.target.value;};
+on("create-custom-file","click",function(){if(S.newFileName.trim())createFileAction(S.newFileName.trim());});
+document.querySelectorAll(".copy-btn").forEach(function(b){b.onclick=function(e){e.stopPropagation();copyText(b.dataset.copy);b.textContent="Copied!";setTimeout(function(){b.textContent="Copy";},1500);};});
+}
+function el(id){return document.getElementById(id);}
+function on(id,ev,fn){var e=el(id);if(e)e.addEventListener(ev,fn);}
+init();
+</script>
+</body>
+</html>
