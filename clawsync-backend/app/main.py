@@ -32,8 +32,8 @@ sessions: dict[str, dict] = {}
 
 
 def get_github_token(request: Request) -> str:
-    # Check X-ClawSync-Token first (tunnel proxy may occupy Authorization header)
-    auth = request.headers.get("X-ClawSync-Token", "")
+    # Check X-Pagekeeper-Token first (tunnel proxy may occupy Authorization header)
+    auth = request.headers.get("X-Pagekeeper-Token", "") or request.headers.get("X-ClawSync-Token", "")
     if not auth:
         auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):

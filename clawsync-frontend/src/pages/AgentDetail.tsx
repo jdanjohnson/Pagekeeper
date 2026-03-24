@@ -457,8 +457,8 @@ export default function AgentDetail() {
                   <div style={{ ...glass({ padding: 12, marginBottom: 8 }) }}>
                     <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginBottom: 4 }}># 1. Clone on your VPS</div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'monospace', fontSize: 11, color: C.claw }}>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>git clone {syncStatus.clone_url_ssh} ~/.openclaw/workspace</span>
-                      <button onClick={() => copyText(`git clone ${syncStatus.clone_url_ssh} ~/.openclaw/workspace`, "clone")} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>git clone {syncStatus.clone_url_ssh} ~/pagekeeper/workspace</span>
+                      <button onClick={() => copyText(`git clone ${syncStatus.clone_url_ssh} ~/pagekeeper/workspace`, "clone")} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                         {copied === "clone" ? <Check style={{ width: 12, height: 12, color: C.green }} /> : <Copy style={{ width: 12, height: 12 }} />}
                       </button>
                     </div>
@@ -466,8 +466,8 @@ export default function AgentDetail() {
                   <div style={{ ...glass({ padding: 12 }) }}>
                     <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginBottom: 4 }}># 2. Auto-sync every minute</div>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontFamily: 'monospace', fontSize: 11, color: C.claw }}>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{`(crontab -l 2>/dev/null; echo '* * * * * cd ~/.openclaw/workspace && git pull -q') | crontab -`}</span>
-                      <button onClick={() => copyText(`(crontab -l 2>/dev/null; echo '* * * * * cd ~/.openclaw/workspace && git pull -q') | crontab -`, "cron")} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{`(crontab -l 2>/dev/null; echo '* * * * * cd ~/pagekeeper/workspace && git pull -q') | crontab -`}</span>
+                      <button onClick={() => copyText(`(crontab -l 2>/dev/null; echo '* * * * * cd ~/pagekeeper/workspace && git pull -q') | crontab -`, "cron")} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                         {copied === "cron" ? <Check style={{ width: 12, height: 12, color: C.green }} /> : <Copy style={{ width: 12, height: 12 }} />}
                       </button>
                     </div>

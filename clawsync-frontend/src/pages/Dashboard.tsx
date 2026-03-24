@@ -319,11 +319,11 @@ export default function Dashboard() {
                     <ExternalLink style={{ width: 14, height: 14, color: C.inkLight }} />
                   </a>
 
-                  <p className="pk-sans" style={{ fontSize: 13, color: C.inkMid, marginBottom: 12 }}>Where does your OpenClaw agent run?</p>
+                  <p className="pk-sans" style={{ fontSize: 13, color: C.inkMid, marginBottom: 12 }}>Where does your agent run?</p>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
                     {[
                       { id: 'vps' as const, emoji: '\uD83D\uDDA5\uFE0F', name: 'VPS / Server', desc: 'DigitalOcean, AWS, Hetzner, etc.' },
-                      { id: 'mac' as const, emoji: '\uD83D\uDCBB', name: 'Mac (Local)', desc: 'Running OpenClaw on your Mac' },
+                      { id: 'mac' as const, emoji: '\uD83D\uDCBB', name: 'Mac (Local)', desc: 'Running your agent on your Mac' },
                     ].map(p => (
                       <button key={p.id} onClick={() => setPlatform(p.id)} className="pk-sans" style={{
                         textAlign: 'left', padding: '14px 16px', borderRadius: 12, cursor: 'pointer', border: platform === p.id ? `2px solid ${C.claw}` : `1px solid ${C.inkFaint}`, background: platform === p.id ? C.clawLight : C.paper,
@@ -345,17 +345,17 @@ export default function Dashboard() {
                   {/* Already have files */}
                   <div style={{ marginTop: 16, background: C.cream, border: `1px solid ${C.inkFaint}`, borderRadius: 12, padding: 16 }}>
                     <div className="pk-sans" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink, marginBottom: 8 }}>
-                      <Upload style={{ width: 14, height: 14, color: C.claw }} /> <strong>Already have OpenClaw files?</strong>
+                      <Upload style={{ width: 14, height: 14, color: C.claw }} /> <strong>Already have agent files?</strong>
                     </div>
                     <p className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginBottom: 10 }}>Push existing files to this repo:</p>
                     <div style={codeBlock}>
-                      <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: C.clawMid, fontSize: 11 }}>{`cd /path/to/your/openclaw/files
+                      <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: C.clawMid, fontSize: 11 }}>{`cd /path/to/your/agent/files
 git init
 git remote add origin git@github.com:${createdRepo.full_name}.git
 git add -A
 git commit -m "import existing files"
 git push -u origin main --force`}</pre>
-                      <button onClick={() => copyText(`cd /path/to/your/openclaw/files\ngit init\ngit remote add origin git@github.com:${createdRepo.full_name}.git\ngit add -A\ngit commit -m "import existing files"\ngit push -u origin main --force`, 'import')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                      <button onClick={() => copyText(`cd /path/to/your/agent/files\ngit init\ngit remote add origin git@github.com:${createdRepo.full_name}.git\ngit add -A\ngit commit -m "import existing files"\ngit push -u origin main --force`, 'import')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                         {copied === "import" ? <Check style={{ width: 13, height: 13, color: C.green }} /> : <Copy style={{ width: 13, height: 13 }} />}
                       </button>
                     </div>
@@ -433,8 +433,8 @@ git push -u origin main --force`}</pre>
                         <div style={{ flex: 1 }}>
                           <div className="pk-sans" style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Clone the repo into your workspace</div>
                           <div style={codeBlock}>
-                            <span style={{ color: C.clawMid }}>git clone git@github.com:{createdRepo.full_name}.git ~/.openclaw/workspace</span>
-                            <button onClick={() => copyText(`git clone git@github.com:${createdRepo.full_name}.git ~/.openclaw/workspace`, 'clone')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                            <span style={{ color: C.clawMid }}>git clone git@github.com:{createdRepo.full_name}.git ~/pagekeeper/workspace</span>
+                            <button onClick={() => copyText(`git clone git@github.com:${createdRepo.full_name}.git ~/pagekeeper/workspace`, 'clone')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                               {copied === "clone" ? <Check style={{ width: 13, height: 13, color: C.green }} /> : <Copy style={{ width: 13, height: 13 }} />}
                             </button>
                           </div>
@@ -451,9 +451,9 @@ git push -u origin main --force`}</pre>
                               <div className="pk-sans" style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Create a two-way sync script</div>
                               <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginBottom: 8 }}>Pulls remote changes AND pushes local edits:</div>
                               <div style={codeBlock}>
-                                <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: C.clawMid, fontSize: 11 }}>{`cat > ~/.openclaw/sync.sh << 'EOF'
+                                <pre style={{ whiteSpace: 'pre-wrap', margin: 0, color: C.clawMid, fontSize: 11 }}>{`cat > ~/pagekeeper/sync.sh << 'EOF'
 #!/bin/bash
-cd ~/.openclaw/workspace || exit 1
+cd ~/pagekeeper/workspace || exit 1
 git pull -q
 if [ -n "$(git status --porcelain)" ]; then
   git add -A
@@ -461,8 +461,8 @@ if [ -n "$(git status --porcelain)" ]; then
   git push -q
 fi
 EOF
-chmod +x ~/.openclaw/sync.sh`}</pre>
-                                <button onClick={() => copyText(`cat > ~/.openclaw/sync.sh << 'EOF'\n#!/bin/bash\ncd ~/.openclaw/workspace || exit 1\ngit pull -q\nif [ -n "$(git status --porcelain)" ]; then\n  git add -A\n  git commit -m "auto-sync from Mac $(date +%H:%M)"\n  git push -q\nfi\nEOF\nchmod +x ~/.openclaw/sync.sh`, 'script')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+chmod +x ~/pagekeeper/sync.sh`}</pre>
+                                <button onClick={() => copyText(`cat > ~/pagekeeper/sync.sh << 'EOF'\n#!/bin/bash\ncd ~/pagekeeper/workspace || exit 1\ngit pull -q\nif [ -n "$(git status --porcelain)" ]; then\n  git add -A\n  git commit -m "auto-sync from Mac $(date +%H:%M)"\n  git push -q\nfi\nEOF\nchmod +x ~/pagekeeper/sync.sh`, 'script')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                                   {copied === "script" ? <Check style={{ width: 13, height: 13, color: C.green }} /> : <Copy style={{ width: 13, height: 13 }} />}
                                 </button>
                               </div>
@@ -476,8 +476,8 @@ chmod +x ~/.openclaw/sync.sh`}</pre>
                             <div style={{ flex: 1 }}>
                               <div className="pk-sans" style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Run it every minute with cron</div>
                               <div style={codeBlock}>
-                                <span style={{ color: C.clawMid }}>{`(crontab -l 2>/dev/null; echo '* * * * * ~/.openclaw/sync.sh') | crontab -`}</span>
-                                <button onClick={() => copyText("(crontab -l 2>/dev/null; echo '* * * * * ~/.openclaw/sync.sh') | crontab -", 'maccron')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                                <span style={{ color: C.clawMid }}>{`(crontab -l 2>/dev/null; echo '* * * * * ~/pagekeeper/sync.sh') | crontab -`}</span>
+                                <button onClick={() => copyText("(crontab -l 2>/dev/null; echo '* * * * * ~/pagekeeper/sync.sh') | crontab -", 'maccron')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                                   {copied === "maccron" ? <Check style={{ width: 13, height: 13, color: C.green }} /> : <Copy style={{ width: 13, height: 13 }} />}
                                 </button>
                               </div>
@@ -493,12 +493,12 @@ chmod +x ~/.openclaw/sync.sh`}</pre>
                           <div style={{ flex: 1 }}>
                             <div className="pk-sans" style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Set up auto-sync (pulls every minute)</div>
                             <div style={codeBlock}>
-                              <span style={{ color: C.clawMid }}>{"(crontab -l 2>/dev/null; echo '* * * * * cd ~/.openclaw/workspace && git pull -q') | crontab -"}</span>
-                              <button onClick={() => copyText("(crontab -l 2>/dev/null; echo '* * * * * cd ~/.openclaw/workspace && git pull -q') | crontab -", 'cron')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
+                              <span style={{ color: C.clawMid }}>{"(crontab -l 2>/dev/null; echo '* * * * * cd ~/pagekeeper/workspace && git pull -q') | crontab -"}</span>
+                              <button onClick={() => copyText("(crontab -l 2>/dev/null; echo '* * * * * cd ~/pagekeeper/workspace && git pull -q') | crontab -", 'cron')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, flexShrink: 0 }}>
                                 {copied === "cron" ? <Check style={{ width: 13, height: 13, color: C.green }} /> : <Copy style={{ width: 13, height: 13 }} />}
                               </button>
                             </div>
-                            <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginTop: 6 }}>OpenClaw reads from ~/.openclaw/workspace/ \u2014 updated files are picked up automatically.</div>
+                            <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight, marginTop: 6 }}>Your agent reads from ~/pagekeeper/workspace/ \u2014 updated files are picked up automatically.</div>
                           </div>
                         </div>
                       </div>
@@ -534,13 +534,13 @@ chmod +x ~/.openclaw/sync.sh`}</pre>
                         'Edit in Pagekeeper',
                         'Saved to GitHub',
                         platform === 'mac' ? 'Mac syncs both ways' : 'VPS auto-pulls',
-                        'OpenClaw reads it',
-                      ].map((label, i) => (
-                        <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div className="pk-sans" style={{ background: C.paper, border: `1px solid ${C.inkFaint}`, borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 500 }}>{label}</div>
-                          {i < 3 && <ArrowRight style={{ width: 13, height: 13, color: C.claw }} />}
-                        </div>
-                      ))}
+                                              'Agent reads latest',
+                                            ].map((label, i) => (
+                                              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <div className="pk-sans" style={{ background: C.paper, border: `1px solid ${C.inkFaint}`, borderRadius: 8, padding: '8px 12px', fontSize: 11, fontWeight: 500 }}>{label}</div>
+                                                {i < 3 && <ArrowRight style={{ width: 13, height: 13, color: C.claw }} />}
+                                              </div>
+                                            ))}
                     </div>
                   </div>
 
@@ -703,7 +703,7 @@ chmod +x ~/.openclaw/sync.sh`}</pre>
 
           <div style={{ background: C.cream, borderRadius: 12, padding: 20, marginBottom: 24, border: `1px solid ${C.inkFaint}` }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>
-              {['Create agent above', 'Edit in Pagekeeper', 'VPS auto-pulls', 'OpenClaw reads it'].map((label, i) => (
+              {['Create agent above', 'Edit in Pagekeeper', 'VPS auto-pulls', 'Agent reads latest'].map((label, i) => (
                 <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div className="pk-sans" style={{ background: C.paper, border: `1px solid ${C.inkFaint}`, borderRadius: 8, padding: '10px 16px', fontSize: 12, fontWeight: 500 }}>{label}</div>
                   {i < 3 && <ArrowRight style={{ width: 13, height: 13, color: C.claw }} />}

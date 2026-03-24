@@ -1,15 +1,15 @@
 const API_URL = import.meta.env.VITE_API_URL || "";
 
 function getToken(): string | null {
-  return localStorage.getItem("clawsync_token");
+  return localStorage.getItem("pagekeeper_token");
 }
 
 export function setToken(token: string) {
-  localStorage.setItem("clawsync_token", token);
+  localStorage.setItem("pagekeeper_token", token);
 }
 
 export function clearToken() {
-  localStorage.removeItem("clawsync_token");
+  localStorage.removeItem("pagekeeper_token");
 }
 
 export function isAuthenticated(): boolean {
@@ -23,7 +23,7 @@ async function apiFetch(path: string, options: RequestInit = {}) {
     ...(options.headers as Record<string, string>),
   };
   if (token) {
-    headers["X-ClawSync-Token"] = token;
+    headers["X-Pagekeeper-Token"] = token;
   }
   const resp = await fetch(`${API_URL}${path}`, { ...options, headers });
   if (resp.status === 401) {

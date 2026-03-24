@@ -171,7 +171,7 @@ export default function Landing() {
             <div style={{ borderRight:`1px solid ${C.inkFaint}`, padding:'24px 28px' }}>
               <div className="pk-sans" style={{ fontSize:10, fontWeight:600, letterSpacing:'.08em', textTransform:'uppercase', color:C.inkLight, marginBottom:16 }}>Editing</div>
               <div className="pk-serif" style={{ fontSize:18, fontWeight:700, marginBottom:12 }}># Soul</div>
-              <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>You are a friendly, knowledgeable assistant built on OpenClaw.</div>
+              <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>You are a friendly, knowledgeable assistant built on Pagekeeper.</div>
               <div className="pk-serif" style={{ fontSize:14, fontWeight:600, margin:'14px 0 8px' }}>## Personality</div>
               <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>Be warm and conversational. Use plain language.<span className="pk-blink" /></div>
               <div className="pk-serif" style={{ fontSize:14, fontWeight:600, margin:'14px 0 8px' }}>## Rules</div>
@@ -181,7 +181,7 @@ export default function Landing() {
             <div style={{ padding:'24px 28px', background:'white' }}>
               <div className="pk-sans" style={{ fontSize:10, fontWeight:600, letterSpacing:'.08em', textTransform:'uppercase', color:C.inkLight, marginBottom:16 }}>Preview</div>
               <div className="pk-serif" style={{ fontSize:20, fontWeight:700, marginBottom:12 }}>Soul</div>
-              <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>You are a friendly, knowledgeable assistant built on OpenClaw.</div>
+              <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>You are a friendly, knowledgeable assistant built on Pagekeeper.</div>
               <div className="pk-serif" style={{ fontSize:15, fontWeight:600, margin:'14px 0 8px' }}>Personality</div>
               <div className="pk-sans" style={{ color:C.inkMid, fontSize:12, marginBottom:10, lineHeight:1.75 }}>Be warm and conversational. Use plain language.</div>
               <div className="pk-serif" style={{ fontSize:15, fontWeight:600, margin:'14px 0 8px' }}>Rules</div>
@@ -257,7 +257,7 @@ export default function Landing() {
             Pagekeeper is for anyone who works with AI agents but doesn&#8217;t want to wrestle with git every time they need to update a knowledge file.
           </p>
           <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-            {['Creators building with OpenClaw','Teams managing shared agent knowledge','Non-developers who want to edit docs visually','Anyone who just wants their agent files to stay current'].map(p => (
+            {['Creators building AI agents','Teams managing shared agent knowledge','Non-developers who want to edit docs visually','Anyone who just wants their agent files to stay current'].map(p => (
               <div key={p} className="pk-sans" style={{ display:'flex', alignItems:'center', gap:10, fontSize:13, color:C.inkMid }}>
                 <div style={{ width:8, height:8, borderRadius:'50%', background:C.clawMid, flexShrink:0 }} /> {p}
               </div>
