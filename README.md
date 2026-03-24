@@ -111,21 +111,33 @@ pagekeeper
 
 ## 3. Web App Edition
 
-A full React + FastAPI web application for hosted/team deployment.
+A full React + FastAPI web application for hosted/team deployment. Frontend and backend live together in one `webapp/` folder.
 
 ### Quick Start
 ```bash
-# Backend
-cd pagekeeper-backend
+cd webapp
+
+# 1. Install backend
 poetry install
 cp .env.example .env  # Add your GitHub OAuth credentials
-poetry run fastapi dev app/main.py --port 8000
 
-# Frontend
-cd pagekeeper-frontend
-npm install
-cp .env.example .env  # Set VITE_API_URL
-npm run dev
+# 2. Build frontend
+cd frontend && npm install && npm run build && cd ..
+cp -r frontend/dist/ static/
+
+# 3. Run (serves both UI + API from one process)
+poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Open `http://localhost:8000` — that's it.
+
+### Development (hot-reload)
+```bash
+# Terminal 1: Backend
+cd webapp && poetry run fastapi dev app/main.py --port 8000
+
+# Terminal 2: Frontend
+cd webapp/frontend && npm run dev
 ```
 
 ### Features
@@ -136,14 +148,14 @@ npm run dev
 
 ### Environment Variables
 
-**Backend** (`pagekeeper-backend/.env`):
+**Backend** (`webapp/.env`):
 ```
 GITHUB_CLIENT_ID=your_client_id
 GITHUB_CLIENT_SECRET=your_client_secret
 FRONTEND_URL=http://localhost:5173
 ```
 
-**Frontend** (`pagekeeper-frontend/.env`):
+**Frontend** (`webapp/frontend/.env`):
 ```
 VITE_API_URL=http://localhost:8000
 ```
@@ -257,28 +269,27 @@ This gives you the safety of git branching without ever touching the terminal.
 ## Architecture
 
 ```
-pagekeeper/
-├── pagekeeper-frontend/     # React + Vite frontend (web app)
-│   ├── src/
-│   │   ├── pages/         # Dashboard, AgentDetail, Timeline, Landing
-│   │   ├── lib/           # API client, utilities
-│   │   └── components/    # Shared components
-│   └── package.json
-├── pagekeeper-backend/      # FastAPI backend (GitHub API proxy + OAuth)
+Pagekeeper/
+├── webapp/                  # Web App (frontend + backend together)
 │   ├── app/
-│   │   └── main.py        # All routes: auth, repos, files, branches
-│   └── pyproject.toml
-├── pagekeeper-cli/          # Pip-installable CLI package
+│   │   └── main.py          # FastAPI: all routes (auth, repos, files, branches)
+│   ├── frontend/            # React + Vite frontend
+│   │   ├── src/pages/       # Dashboard, AgentDetail, Timeline, Landing
+│   │   ├── src/lib/         # API client, utilities
+│   │   └── package.json
+│   ├── pyproject.toml       # Backend dependencies (Poetry)
+│   └── .env.example
+├── pagekeeper-cli/          # CLI edition (pip install pagekeeper)
 │   ├── pagekeeper/
-│   │   ├── cli.py         # Entry point
-│   │   └── server.py      # Embedded FastAPI server
+│   │   ├── cli.py           # Entry point
+│   │   └── server.py        # Embedded FastAPI server
 │   └── pyproject.toml
-├── pagekeeper-desktop/      # Electron desktop wrapper
-│   ├── main.js            # Electron main process
-│   ├── server/            # Embedded backend for desktop
+├── pagekeeper-desktop/      # Desktop edition (Electron)
+│   ├── main.js              # Electron main process
+│   ├── server/              # Embedded backend for desktop
 │   └── package.json
-└── pagekeeper-local/        # Standalone HTML edition
-    └── index.html         # Single file, all features
+└── pagekeeper-local/        # HTML Local edition (zero install)
+    └── index.html           # Single file, all features
 ```
 
 ## Tech Stack

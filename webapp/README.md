@@ -1,20 +1,40 @@
-# Pagekeeper Backend
+# Pagekeeper Web App
 
-FastAPI server that proxies GitHub API calls and handles OAuth authentication. This is the API layer for the Pagekeeper web app.
+The hosted web edition of Pagekeeper — a FastAPI backend + React frontend served as a single app.
 
-## Quick Start
+## Quick Start (Production)
 
 ```bash
-# Install dependencies
+# 1. Install backend dependencies
 poetry install
 
-# Configure environment
+# 2. Configure environment
 cp .env.example .env
 # Edit .env with your GitHub OAuth credentials
 
-# Run development server
-poetry run fastapi dev app/main.py --port 8000
+# 3. Build the frontend
+cd frontend && npm install && npm run build && cd ..
+
+# 4. Copy frontend build into backend static folder
+cp -r frontend/dist/ static/
+
+# 5. Run the app
+poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
+
+Open `http://localhost:8000` — both the UI and API are served from one process.
+
+## Development (with hot-reload)
+
+```bash
+# Terminal 1: Backend
+poetry install && poetry run fastapi dev app/main.py --port 8000
+
+# Terminal 2: Frontend (hot-reload)
+cd frontend && npm install && npm run dev
+```
+
+Frontend dev server runs on `http://localhost:5173` and proxies API calls to the backend on port 8000. Set `VITE_API_URL=http://localhost:8000` in `frontend/.env`.
 
 ## Environment Variables
 
