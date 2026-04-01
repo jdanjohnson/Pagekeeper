@@ -263,7 +263,7 @@ export default function AgentDetail() {
             <span>Sync Check</span>
           </button>
           {/* Timeline btn */}
-          <button onClick={() => navigate(`/timeline/${owner}/${repo}`)} style={btnSecondary}>
+          <button onClick={() => navigate(`/timeline/${owner}/${repo}${selectedFile ? `?file=${encodeURIComponent(selectedFile.path)}` : ''}`)} style={btnSecondary}>
             <Clock style={{ width: 14, height: 14 }} />
             <span>Timeline</span>
           </button>
@@ -632,8 +632,13 @@ export default function AgentDetail() {
                   <span className="pk-sans" style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{selectedFile.name}</span>
                   {hasUnsavedChanges && <div style={{ width: 7, height: 7, background: C.claw, borderRadius: '50%' }} />}
                 </div>
-                <div className="pk-sans" style={{ fontSize: 11, color: C.inkLight }}>
-                  {editContent.split(/\s+/).filter(Boolean).length} words
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <button onClick={() => navigate(`/timeline/${owner}/${repo}?file=${encodeURIComponent(selectedFile.path)}`)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: C.inkLight, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontFamily: "'Instrument Sans', sans-serif" }}>
+                    <Clock style={{ width: 12, height: 12 }} /> File History
+                  </button>
+                  <span className="pk-sans" style={{ fontSize: 11, color: C.inkLight }}>
+                    {editContent.split(/\s+/).filter(Boolean).length} words
+                  </span>
                 </div>
               </div>
               <div style={{ flex: 1, overflow: 'auto' }} data-color-mode="light">

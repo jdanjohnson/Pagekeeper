@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getTimeline, getCommitDetail } from "../lib/api";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { getTimeline, getCommitDetail, listMarkdownFiles, listFiles } from "../lib/api";
 import {
   ArrowLeft, Bot, User, Clock, FileText, Plus, Minus, ChevronDown, ChevronRight, Loader2,
 } from "lucide-react";
@@ -27,20 +27,44 @@ const SOURCE_CONFIG = {
   pagekeeper: { icon: Clock, color: C.claw, bg: C.clawLight, label: "Pagekeeper" },
 };
 
+interface RepoFile { name: string; path: string; type: string; }
+
 export default function Timeline() {
   const { owner, repo } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [timeline, setTimeline] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedSha, setExpandedSha] = useState<string | null>(null);
   const [commitDetails, setCommitDetails] = useState<Record<string, CommitDetail>>({});
   const [loadingDetail, setLoadingDetail] = useState(false);
-  const [filterFile, setFilterFile] = useState("");
+  const [filterFile, setFilterFile] = useState(searchParams.get("file") || "");
+  const [repoFiles, setRepoFiles] = useState<RepoFile[]>([]);
+
+  useEffect(() => {
+    if (!owner || !repo) return;
+    loadRepoFiles();
+  }, [owner, repo]);
 
   useEffect(() => {
     if (!owner || !repo) return;
     loadTimeline();
   }, [owner, repo, filterFile]);
+
+  const loadRepoFiles = async () => {
+    try {
+      const [rootData, mdData] = await Promise.all([listFiles(owner!, repo!, ""), listMarkdownFiles(owner!, repo!)]);
+      const rootFiles = (rootData.files || []).filter((f: RepoFile) => f.type === "file");
+      const mdFiles = mdData.files || [];
+      const seen = new Set<string>();
+      const all: RepoFile[] = [];
+      for (const f of [...rootFiles, ...mdFiles]) {
+        if (!seen.has(f.path)) { seen.add(f.path); all.push(f); }
+      }
+      all.sort((a, b) => a.path.localeCompare(b.path));
+      setRepoFiles(all);
+    } catch (e) { console.error(e); }
+  };
 
   const loadTimeline = async () => {
     setLoading(true);
@@ -105,12 +129,9 @@ export default function Timeline() {
         </div>
         <select value={filterFile} onChange={(e) => setFilterFile(e.target.value)} className="pk-sans" style={{ background: C.cream, border: `1px solid ${C.inkFaint}`, borderRadius: 8, padding: '6px 12px', fontSize: 13, color: C.inkMid, outline: 'none' }}>
           <option value="">All files</option>
-          <option value="SOUL.md">SOUL.md</option>
-          <option value="MEMORY.md">MEMORY.md</option>
-          <option value="USER.md">USER.md</option>
-          <option value="AGENTS.md">AGENTS.md</option>
-          <option value="IDENTITY.md">IDENTITY.md</option>
-          <option value="TOOLS.md">TOOLS.md</option>
+          {repoFiles.map((f) => (
+            <option key={f.path} value={f.path}>{f.path}</option>
+          ))}
         </select>
       </nav>
 
